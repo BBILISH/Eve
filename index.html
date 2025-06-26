@@ -367,8 +367,169 @@
             color: #dc2626; /* Red for "Used!" */
             margin-left: 1rem;
         }
+        .progress-bar-container { /* New styles for progress bars */
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            padding: 1.5rem 2rem;
+            margin-top: 2rem;
+            margin-bottom: 2.5rem;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        .weekly-progress-item {
+            margin-bottom: 1.5rem;
+            text-align: right; /* Align text to the right for RTL */
+        }
+        .weekly-progress-item h3 {
+            font-weight: 700;
+            color: #4a0070; /* Dark purple */
+            margin-bottom: 0.5rem;
+            font-size: 1.25rem;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 0.75rem;
+            overflow: hidden;
+            height: 25px; /* Height of the progress bar */
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #a21caf; /* Dark fuchsia */
+            border-radius: 0.75rem;
+            text-align: center;
+            line-height: 25px; /* Vertically align text in bar */
+            color: white;
+            font-weight: bold;
+            transition: width 0.5s ease-in-out;
+            direction: ltr; /* Ensure numbers and / are LTR inside the bar */
+            display: flex; /* Use flex to center text */
+            justify-content: center;
+            align-items: center;
+        }
+        .thumbnail-img {
+            width: 120px; /* Fixed width for thumbnail */
+            height: 90px; /* Fixed height for thumbnail (16:9 aspect ratio) */
+            object-fit: cover; /* Ensures image covers the area without distortion */
+            border-radius: 0.5rem;
+            margin-left: 1rem; /* Space between thumbnail and text */
+            flex-shrink: 0; /* Prevent shrinking on smaller screens */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .workout-item .workout-details {
+            display: flex;
+            align-items: center; /* Align thumbnail and text vertically */
+            flex-grow: 1;
+        }
+        .workout-item .text-details { /* New wrapper for text content */
+            flex-grow: 1; /* Allow text to take remaining space */
+        }
 
-        /* Progress bar styles removed */
+        /* Added some responsive adjustments for thumbnail section */
+        @media (max-width: 639px) { /* For mobile */
+            .workout-item .workout-details {
+                flex-direction: column; /* Stack thumbnail and text vertically */
+                align-items: flex-start; /* Align text to start */
+            }
+            .thumbnail-img {
+                margin-left: 0;
+                margin-bottom: 0.75rem; /* Space below thumbnail */
+                width: 100%; /* Make thumbnail full width on small screens */
+                height: auto; /* Allow height to adjust proportionally */
+                max-width: 160px; /* Max width for mobile thumbnail */
+            }
+        }
+
+        /* Calendar Modal Styles */
+        .calendar-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+        }
+        .calendar-modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .calendar-modal-content {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+        .calendar-modal-overlay.show .calendar-modal-content {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .calendar-modal-content h3 {
+            font-size: 1.75rem;
+            font-weight: bold;
+            color: #4a0070;
+            margin-bottom: 1rem;
+        }
+        .calendar-modal-content label {
+            display: block;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #4a0070;
+            text-align: right;
+        }
+        .calendar-modal-content input[type="date"],
+        .calendar-modal-content input[type="time"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d8b4fe;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            color: #4a0070;
+            text-align: center;
+        }
+        .calendar-modal-content .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .calendar-modal-content .modal-actions button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .calendar-modal-content .modal-actions .save-button {
+            background-color: #a21caf;
+            color: white;
+        }
+        .calendar-modal-content .modal-actions .save-button:hover {
+            background-color: #8b109b;
+        }
+        .calendar-modal-content .modal-actions .cancel-button {
+            background-color: #e0e0e0;
+            color: #4a0070;
+        }
+        .calendar-modal-content .modal-actions .cancel-button:hover {
+            background-color: #cccccc;
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8">
@@ -378,18 +539,19 @@
         </h1>
         <p class="text-xl sm:text-2xl text-gray-600 mb-8 text-center">אני איתך בכל צעד ובכל אימון תמיד כאן איתך ובשבילך ❤️</p>
 
-        <!-- New: Month Tabs Container -->
+        <!-- Month Tabs Container -->
         <div id="month-tabs-container" class="flex justify-center gap-4 mb-8">
             <!-- Month buttons will be rendered here by JavaScript -->
         </div>
 
-        <!-- Main navigation buttons (Workouts / Achievements) -->
-        <div id="main-navigation-buttons" class="flex justify-center gap-4 mb-8 mt-4">
+        <!-- Main navigation buttons (Workouts / Achievements / Progress) -->
+        <div id="main-navigation-buttons" class="flex justify-center gap-4 mb-8 mt-4 flex-wrap">
             <button id="show-workouts-btn" class="nav-button active">תוכנית האימונים</button>
             <button id="show-achievements-btn" class="nav-button">הישגים ופרסים</button>
+            <button id="show-progress-btn" class="nav-button">התקדמות</button>
         </div>
 
-        <!-- This div will hold either workout-container or achievements-container -->
+        <!-- This div will hold either workout-container, achievements-container or progress-container -->
         <div id="content-display-area">
             <div id="total-workouts-counter" class="total-workouts-counter">
                 סך הכל אימונים שהושלמו: <span id="completed-workouts-count">0</span>
@@ -410,6 +572,20 @@
                     <p class="text-gray-600 text-center mt-6">כל הכבוד על ההתמדה והכוח שלך, גאה בך כל כך!</p>
                 </div>
             </div>
+
+            <!-- Progress Bars Container -->
+            <div id="progress-bars-container" class="hidden flex justify-center">
+                <div class="progress-bar-container">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-700 mb-6 text-center border-b-2 border-pink-400 pb-2">
+                        התקדמות שבועית בחודש <span id="progress-month-display"></span>
+                    </h2>
+                    <div id="weekly-progress-list">
+                        <!-- Weekly progress bars will be rendered here -->
+                    </div>
+                    <p class="text-gray-600 text-center mt-6">התמידי כך, גאה בך!</p>
+                </div>
+            </div>
+
         </div>
     </div>
     
@@ -418,6 +594,22 @@
 
     <!-- Temporary Message Container -->
     <div id="temporary-message" class="temporary-message"></div>
+
+    <!-- Calendar Modal Overlay -->
+    <div id="calendar-modal-overlay" class="calendar-modal-overlay">
+        <div class="calendar-modal-content">
+            <h3 id="modal-workout-title">הוסף/י אימון ליומן</h3>
+            <p class="text-gray-600 mb-4">בחרי תאריך ושעה לאימון:</p>
+            <label for="calendar-date-input">תאריך:</label>
+            <input type="date" id="calendar-date-input" class="mb-2">
+            <label for="calendar-time-input">שעה:</label>
+            <input type="time" id="calendar-time-input" value="09:00">
+            <div class="modal-actions">
+                <button id="modal-add-to-calendar-btn" class="save-button">הוסף/י ליומן</button>
+                <button id="modal-cancel-btn" class="cancel-button">ביטול</button>
+            </div>
+        </div>
+    </div>
 
     <script>
         // Define the CSV data as a multi-line string
@@ -439,7 +631,6 @@
         // Function to parse CSV data
         function parseCSV(csv) {
             const lines = csv.split('\n');
-            // Fixed the typo: lines[0].1split(',') -> lines[0].split(',')
             const headers = lines[0].split(',');
             const result = [];
 
@@ -448,9 +639,8 @@
                 const regex = /(?:^|,)(?:"([^"]*)"|([^,]*))/g;
                 let match;
                 const values = [];
-                // Ensure to reset regex lastIndex for each line if using global flag
-                regex.lastIndex = 0; 
-                while (match = regex.exec(currentLine)) {
+                regex.lastIndex = 0; // Reset regex for each line
+                while ((match = regex.exec(currentLine)) !== null) {
                     values.push(match[1] || match[2] || '');
                 }
 
@@ -466,6 +656,7 @@
         }
 
         // Function to get a unique ID for each workout including month
+        // We keep 'יום' in the ID for uniqueness, even if not displayed.
         function getWorkoutId(workout) {
             const cleanedWorkoutType = workout['סוג אימון'].replace(/\s\(אופציונלי\)/g, '').replace(/\s/g, '-');
             return `month-${workout['חודש']}-week-${workout['שבוע']}-day-${workout['יום'].replace(/\s/g, '-')}-type-${cleanedWorkoutType}`;
@@ -627,21 +818,37 @@
             localStorage.setItem('currentActiveMonth', currentActiveMonth);
         }
 
-        let currentView = localStorage.getItem('currentView') || 'workouts'; // 'workouts' or 'achievements'
+        let currentView = localStorage.getItem('currentView') || 'workouts'; // 'workouts', 'achievements' or 'progress'
 
 
         // Element references
-        const monthTabsContainer = document.getElementById('month-tabs-container'); // New month tabs container
+        const monthTabsContainer = document.getElementById('month-tabs-container');
         const workoutContainer = document.getElementById('workout-container');
         const achievementsContainer = document.getElementById('achievements-container');
-        const achievementList = document.getElementById('achievement-list'); // Corrected reference
+        const achievementList = document.getElementById('achievement-list');
+        const progressBarsContainer = document.getElementById('progress-bars-container');
+        const weeklyProgressList = document.getElementById('weekly-progress-list');
+        const progressMonthDisplay = document.getElementById('progress-month-display');
         const showWorkoutsBtn = document.getElementById('show-workouts-btn');
         const showAchievementsBtn = document.getElementById('show-achievements-btn');
-        const exportDataBtn = document.getElementById('export-data-btn'); // Get the export button
+        const showProgressBtn = document.getElementById('show-progress-btn');
+        const exportDataBtn = document.getElementById('export-data-btn');
         const completedWorkoutsCountSpan = document.getElementById('completed-workouts-count');
-        const temporaryMessageDiv = document.getElementById('temporary-message'); // Reference to the temporary message div
+        const temporaryMessageDiv = document.getElementById('temporary-message');
 
         const WHATSAPP_NUMBER = '972584480705'; // Your WhatsApp number without the '+'
+
+        // Calendar modal elements
+        const calendarModalOverlay = document.getElementById('calendar-modal-overlay');
+        const modalWorkoutTitle = document.getElementById('modal-workout-title');
+        const calendarDateInput = document.getElementById('calendar-date-input');
+        const calendarTimeInput = document.getElementById('calendar-time-input');
+        const modalAddToCalendarBtn = document.getElementById('modal-add-to-calendar-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+
+        // Store workout data temporarily for calendar modal
+        let currentWorkoutForCalendar = null;
+
 
         /**
          * Displays a temporary message in the center of the screen.
@@ -725,10 +932,25 @@
                     currentActiveMonth = month;
                     localStorage.setItem('currentActiveMonth', currentActiveMonth);
                     renderMonthTabs(); // Re-render tabs to update active state
-                    showWorkoutsPage(); // Show workouts for the newly selected month
+                    if (currentView === 'workouts') { // Only render workouts if that's the current view
+                        showWorkoutsPage(); 
+                    } else if (currentView === 'progress') { // Re-render progress bars if progress is active
+                        showProgressPage();
+                    }
                 });
                 monthTabsContainer.appendChild(monthButton);
             });
+        }
+
+        /**
+         * Extracts YouTube video ID from a given URL.
+         * @param {string} url - The YouTube video URL.
+         * @returns {string|null} The video ID or null if not found.
+         */
+        function extractYouTubeVideoId(url) {
+            const regExp = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([\w-]{11})(?:\S+)?/;
+            const match = url.match(regExp);
+            return (match && match[1].length === 11) ? match[1] : null;
         }
 
         // Render workouts for the current active month
@@ -743,12 +965,8 @@
                 noWorkoutsMessage.textContent = 'אין אימונים לחודש זה.';
                 workoutContainer.appendChild(noWorkoutsMessage);
 
-                // Also ensure the month completion message is hidden if no workouts for this month
-                // This line was causing an error as it was looking for previous sibling directly.
-                // The month completion message is now appended *after* the month heading.
-                // It's better to update it directly if it exists based on currentActiveMonth.
-                const monthCompletionMessage = document.querySelector(`.month-completion-message`); // Selecting more generally
-                if (monthCompletionMessage) { // If it exists from a previous render
+                const monthCompletionMessage = document.querySelector(`.month-completion-message`);
+                if (monthCompletionMessage) {
                     monthCompletionMessage.style.display = 'none';
                 }
                 return;
@@ -757,13 +975,13 @@
             const monthHeading = document.createElement('h2');
             monthHeading.className = 'text-3xl sm:text-4xl font-extrabold text-pink-700 mb-8 text-center mt-10';
             monthHeading.textContent = `חודש ${currentActiveMonth}`;
-            monthHeading.dataset.monthHeading = currentActiveMonth; // Add data attribute for easier selection
+            monthHeading.dataset.monthHeading = currentActiveMonth;
             workoutContainer.appendChild(monthHeading);
 
             const monthCompletionMessage = document.createElement('div');
             monthCompletionMessage.className = 'month-completion-message mb-8';
             monthCompletionMessage.textContent = `כל הכבוד על השלמת חודש ${currentActiveMonth} מדהימה שלי! ❤️`;
-            workoutContainer.appendChild(monthCompletionMessage); // Append after month heading
+            workoutContainer.appendChild(monthCompletionMessage);
 
 
             for (const weekNum in monthWorkouts) {
@@ -792,21 +1010,33 @@
                     
                     const isOptional = workout['סוג אימון'].includes('(אופציונלי)');
                     
+                    const youtubeVideoId = extractYouTubeVideoId(workout['קישור']);
+                    const thumbnailUrl = youtubeVideoId ? `https://img.youtube.com/vi/${youtubeVideoId}/hqdefault.jpg` : 'https://placehold.co/120x90/cccccc/ffffff?text=No+Video';
+
                     const workoutItem = document.createElement('div');
                     workoutItem.className = `workout-item bg-gray-50 p-4 mb-4 rounded-xl border border-gray-200 ${isCompleted ? 'completed' : ''} ${isOptional && !isCompleted ? 'optional' : ''}`;
-                    workoutItem.dataset.workoutId = workoutId; // Add workoutId to item for easier targeting
+                    workoutItem.dataset.workoutId = workoutId;
 
-                    let ratingOptions = '<option value="">דרגי</option>'; /* Changed to נקבה */
+                    let ratingOptions = '<option value="">דרגי</option>';
                     for (let i = 1; i <= 10; i++) {
                         ratingOptions += `<option value="${i}" ${initialRating == i ? 'selected' : ''}>${i}</option>`;
                     }
 
                     workoutItem.innerHTML = `
-                        <div class="workout-details flex-grow">
-                            <h3 class="text-xl font-semibold text-gray-700 mb-2">${workout['סוג אימון']}</h3>
-                            <p class="text-gray-600"><span class="font-medium">יום:</span> ${workout['יום']}</p>
-                            <p class="text-gray-600"><span class="font-medium">משך:</span> ${workout['משך']}</p>
-                            <p class="text-gray-600 mb-3">${workout['תיאור']}</p>
+                        <div class="workout-details flex items-start sm:items-center">
+                            <img src="${thumbnailUrl}" alt="Thumbnail for ${workout['סוג אימון']}" class="thumbnail-img" onerror="this.onerror=null; this.src='https://placehold.co/120x90/cccccc/ffffff?text=No+Video';">
+                            <div class="text-details flex-grow">
+                                <button class="add-to-calendar-btn w-full sm:w-auto bg-blue-500 hover:bg-blue-600 text-white p-2 rounded-lg mb-2"
+                                    data-workout-title="${workout['סוג אימון']}"
+                                    data-workout-duration="${workout['משך']}"
+                                    data-workout-link="${workout['קישור']}"
+                                    data-workout-description="${workout['תיאור']}">
+                                    הוסף/י ליומן
+                                </button>
+                                <h3 class="text-xl font-semibold text-gray-700 mb-2">${workout['סוג אימון']}</h3>
+                                <p class="text-gray-600"><span class="font-medium">משך:</span> ${workout['משך']}</p>
+                                <p class="text-gray-600 mb-3">${workout['תיאור']}</p>
+                            </div>
                         </div>
                         <div class="workout-actions flex flex-col items-center sm:items-end w-full sm:w-auto">
                             <button class="whatsapp-button whatsapp-before-button mb-2 w-full sm:w-auto" data-message="יפה שלי ❤️" data-whatsapp-link="https://wa.me/${WHATSAPP_NUMBER}?text=היי הדר, אני מתחילה אימון ${workout['סוג אימון']}! הנה תמונה שלי לפני...">
@@ -843,7 +1073,6 @@
         }
 
         // Delegated event listener for all dynamic buttons/inputs within content-display-area
-        // Changed listener to content-display-area, more robust for all dynamic elements
         document.getElementById('content-display-area').addEventListener('click', function(event) {
             const target = event.target;
             // Handle complete button click
@@ -852,14 +1081,13 @@
                 const workoutId = button.dataset.workoutId;
                 const workoutItem = button.closest('.workout-item');
                 const weekCard = button.closest('.week-card');
-                // Ensure weekTitle is correctly extracted from the actual week card it belongs to
                 const weekTitleElement = weekCard.querySelector('h2');
                 const weekNum = weekTitleElement ? weekTitleElement.textContent.replace('שבוע ', '') : null;
                 const monthNum = weekCard.dataset.month;
 
                 if (!weekNum || !monthNum) {
                     console.error("Could not determine week or month for workoutId:", workoutId);
-                    return; // Exit if essential data is missing
+                    return;
                 }
 
                 let currentData = completionStatus[workoutId] || { completed: false, rating: null, notes: "" };
@@ -871,18 +1099,17 @@
                     button.textContent = 'בטלי סימון';
                     button.classList.add('unmark');
                     const wellDoneSpan = workoutItem.querySelector('.well-done-message');
-                    wellDoneSpan.textContent = getNextWellDoneMessage(); // Get next message sequentially
+                    wellDoneSpan.textContent = getNextWellDoneMessage();
                     wellDoneSpan.style.display = 'block';
-                    // Optional: createConfetti(button); // Re-enable if you want confetti back
 
                     // Check for bonus reward chance - now from randomRewards list
                     if (Math.random() < 0.15) { // 15% chance for a bonus reward
-                        const bonusRewardText = getNonRepeatingRandomReward(randomRewards, 'lastBonusReward'); // Use randomRewards here
-                        const bonusKey = `bonus-${Date.now()}`; // Unique key for bonus reward
+                        const bonusRewardText = getNonRepeatingRandomReward(randomRewards, 'lastBonusReward');
+                        const bonusKey = `bonus-${Date.now()}`;
                         let earnedRewards = loadEarnedRewards();
                         earnedRewards[bonusKey] = { reward: bonusRewardText, used: false, type: 'bonus' };
                         saveEarnedRewards(earnedRewards);
-                        showTemporaryMessage(`קיבלת פרס בונוס: ${bonusRewardText}!`); // Show bonus message
+                        showTemporaryMessage(`קיבלת פרס בונוס: ${bonusRewardText}!`);
                     }
 
                 } else {
@@ -897,18 +1124,19 @@
                     workoutItem.querySelector('.well-done-message').style.display = 'none';
                 }
                 completionStatus[workoutId] = currentData;
-                saveCompletionStatus(completionStatus); // Save to localStorage
+                saveCompletionStatus(completionStatus);
 
                 const currentWeekWorkouts = workoutsByMonth[monthNum][weekNum];
                 updateWeekCompletionDisplay(weekCard, monthNum, weekNum, currentWeekWorkouts);
                 const currentMonthWorkouts = workoutsByMonth[monthNum];
                 updateMonthCompletionDisplay(workoutContainer, monthNum, currentMonthWorkouts);
                 updateCompletedWorkoutsCounter();
-                renderAchievements(); // Re-render achievements to show new rewards/certificates
+                renderAchievements();
+                renderProgressBars(); // Update progress bars on completion status change
             }
             // Handle WhatsApp button clicks
             else if (target.classList.contains('whatsapp-button')) {
-                event.preventDefault(); // Prevent default link behavior
+                event.preventDefault();
                 const message = target.dataset.message;
                 const whatsappLink = target.dataset.whatsappLink;
 
@@ -919,7 +1147,75 @@
                     window.open(whatsappLink, '_blank');
                 }, 1000); // 1 second delay
             }
+            // Handle "Add to Calendar" button click
+            else if (target.classList.contains('add-to-calendar-btn')) {
+                const button = target;
+                currentWorkoutForCalendar = {
+                    title: button.dataset.workoutTitle,
+                    duration: button.dataset.workoutDuration,
+                    link: button.dataset.workoutLink,
+                    description: button.dataset.workoutDescription
+                };
+                modalWorkoutTitle.textContent = `הוסף/י את "${currentWorkoutForCalendar.title}" ליומן`;
+                // Set default date to today and time to a reasonable default
+                const today = new Date();
+                calendarDateInput.value = today.toISOString().slice(0, 10); // YYYY-MM-DD
+                calendarTimeInput.value = "09:00"; // Default time
+                calendarModalOverlay.classList.add('show');
+            }
         });
+
+        // Event listeners for Calendar Modal
+        modalCancelBtn.addEventListener('click', () => {
+            calendarModalOverlay.classList.remove('show');
+            currentWorkoutForCalendar = null;
+        });
+
+        modalAddToCalendarBtn.addEventListener('click', () => {
+            const selectedDate = calendarDateInput.value;
+            const selectedTime = calendarTimeInput.value;
+
+            if (!selectedDate || !selectedTime) {
+                showTemporaryMessage("בבקשה בחרי תאריך ושעה.");
+                return;
+            }
+
+            // Parse duration (e.g., "30 דק'")
+            const durationMatch = currentWorkoutForCalendar.duration.match(/(\d+)\s*דק'/);
+            let durationMinutes = 30; // Default if not found
+            if (durationMatch && durationMatch[1]) {
+                durationMinutes = parseInt(durationMatch[1], 10);
+            }
+
+            const startDateTime = new Date(`${selectedDate}T${selectedTime}:00`);
+            const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60 * 1000); // Add duration in milliseconds
+
+            // Format dates for Google Calendar URL
+            const formatDateForGoogleCalendar = (date) => {
+                // Ensure date components are padded with leading zeros for consistent format
+                const year = date.getFullYear();
+                const month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are 0-indexed
+                const day = date.getDate().toString().padStart(2, '0');
+                const hours = date.getHours().toString().padStart(2, '0');
+                const minutes = date.getMinutes().toString().padStart(2, '0');
+                const seconds = date.getSeconds().toString().padStart(2, '0');
+                return `${year}${month}${day}T${hours}${minutes}${seconds}`;
+            };
+
+            const startTimeFormatted = formatDateForGoogleCalendar(startDateTime);
+            const endTimeFormatted = formatDateForGoogleCalendar(endDateTime);
+
+            const eventTitle = encodeURIComponent(`אימון: ${currentWorkoutForCalendar.title}`);
+            const eventDetails = encodeURIComponent(`${currentWorkoutForCalendar.description}\n\nקישור לאימון: ${currentWorkoutForCalendar.link}`);
+            
+            const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${eventTitle}&dates=${startTimeFormatted}/${endTimeFormatted}&details=${eventDetails}&sf=true&output=xml`;
+
+            window.open(googleCalendarUrl, '_blank');
+            showTemporaryMessage("האימון נוסף ליומן!");
+            calendarModalOverlay.classList.remove('show');
+            currentWorkoutForCalendar = null;
+        });
+
 
         document.getElementById('content-display-area').addEventListener('change', function(event) {
             const target = event.target;
@@ -929,7 +1225,7 @@
                 let currentData = completionStatus[workoutId] || { completed: false, rating: null, notes: "" };
                 currentData.rating = select.value === "" ? null : parseInt(select.value);
                 completionStatus[workoutId] = currentData;
-                saveCompletionStatus(completionStatus); // Save to localStorage
+                saveCompletionStatus(completionStatus);
             }
         });
 
@@ -941,7 +1237,7 @@
                 let currentData = completionStatus[workoutId] || { completed: false, rating: null, notes: "" };
                 currentData.notes = textarea.value;
                 completionStatus[workoutId] = currentData;
-                saveCompletionStatus(completionStatus); // Save to localStorage
+                saveCompletionStatus(completionStatus);
             }
         });
 
@@ -952,34 +1248,31 @@
             if (earnedRewards[rewardKey] && !earnedRewards[rewardKey].used) {
                 earnedRewards[rewardKey].used = true;
                 saveEarnedRewards(earnedRewards);
-                renderAchievements(); // Re-render achievements to update display
+                renderAchievements();
             }
         }
 
 
         // Function to update month completion display and trigger certificate
         function updateMonthCompletionDisplay(container, monthNum, monthWorkouts) {
-            // Select the month completion message specific to the current active month, or the most recently rendered one
             const monthCompletionMessage = container.querySelector(`.month-completion-message`);
 
             if (!monthCompletionMessage) {
-                // This scenario might happen if renderWorkouts() returned early due to no workouts
                 console.warn("Month completion message element not found for month:", monthNum, ". Skipping update.");
                 return; 
             }
 
             let earnedRewards = loadEarnedRewards();
-            const certificateKey = `certificate-${monthNum}`; // Key for certificate
+            const certificateKey = `certificate-${monthNum}`;
 
             if (isMonthCompleted(monthNum, monthWorkouts)) {
                 monthCompletionMessage.style.display = 'block';
                 monthCompletionMessage.style.opacity = '1';
                 
-                // Generate certificate if not already generated
                 if (!earnedRewards[certificateKey]) {
                     earnedRewards[certificateKey] = { text: `תעודת הצטיינות אישית – כל הכבוד על סיום חודש ${monthNum}, מדהימה שלי!`, type: 'certificate' };
                     saveEarnedRewards(earnedRewards);
-                    renderAchievements(); // Re-render achievements to show the new certificate
+                    renderAchievements();
                 }
 
             } else {
@@ -991,45 +1284,39 @@
 
         // Render the achievements view
         function renderAchievements() {
-            achievementList.innerHTML = ''; // Clear previous content
+            achievementList.innerHTML = '';
             let completedWeeksCountOverall = 0;
             let completedMonthsCountOverall = 0;
-            let earnedRewards = loadEarnedRewards(); // Load rewards from storage
+            let earnedRewards = loadEarnedRewards();
 
-            // Separate arrays for rendering order
             const weeklyRewardsToRender = [];
             const monthlyRewardsToRender = [];
             const bonusRewardsToRender = [];
             const certificatesToRender = [];
 
-            // Populate weekly and monthly rewards
             for (const monthNum in workoutsByMonth) {
                 const currentMonthWorkouts = workoutsByMonth[monthNum];
 
-                // Check weekly achievements within this month
                 for (const weekNum in currentMonthWorkouts) {
                     const weekWorkouts = currentMonthWorkouts[weekNum];
-                    // Only count "required" workouts for week completion check
                     const requiredWorkoutsInWeek = weekWorkouts.filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
                     const completedRequiredWorkoutsInWeek = requiredWorkoutsInWeek.filter(workout => completionStatus[getWorkoutId(workout)]?.completed).length;
 
                     if (requiredWorkoutsInWeek.length > 0 && completedRequiredWorkoutsInWeek === requiredWorkoutsInWeek.length) {
                         completedWeeksCountOverall++;
-                        const weekKey = `week-${monthNum}-${weekNum}`; // Unique key for this week's reward
+                        const weekKey = `week-${monthNum}-${weekNum}`;
 
                         let rewardData;
                         if (earnedRewards[weekKey]) {
-                            rewardData = earnedRewards[weekKey]; // Use saved reward if it exists
+                            rewardData = earnedRewards[weekKey];
                         } else {
-                            // Assign new reward if not saved
                             let rewardTextValue;
                             if (completedWeeksCountOverall === 1) {
-                                rewardTextValue = fixedWeeklyAchievementRewards[1]; // Fixed first weekly reward
+                                rewardTextValue = fixedWeeklyAchievementRewards[1];
                             } else {
-                                // For subsequent weekly achievements, pick a random one, ensuring no immediate repeat
                                 rewardTextValue = getNonRepeatingRandomReward(randomRewards, 'lastRandomReward');
                             }
-                            rewardData = { reward: rewardTextValue, used: false, type: 'weekly' }; // Save the newly assigned reward as an object
+                            rewardData = { reward: rewardTextValue, used: false, type: 'weekly' };
                             earnedRewards[weekKey] = rewardData;
                         }
                         if (rewardData.reward) {
@@ -1045,29 +1332,25 @@
                     }
                 }
 
-                // Check monthly achievements (after all weeks for the month have been processed)
-                // Only count "required" workouts for month completion check
                 const allRequiredWorkoutsInMonth = Object.values(currentMonthWorkouts).flat().filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
                 const completedAllRequiredWorkoutsInMonth = allRequiredWorkoutsInMonth.filter(workout => completionStatus[getWorkoutId(workout)]?.completed).length;
 
                 if (allRequiredWorkoutsInMonth.length > 0 && completedAllRequiredWorkoutsInMonth === allRequiredWorkoutsInMonth.length) {
                     completedMonthsCountOverall++;
-                    const monthKey = `month-${monthNum}`; // Unique key for this month's reward
-                    const certificateKey = `certificate-${monthNum}`; // Key for certificate
+                    const monthKey = `month-${monthNum}`;
+                    const certificateKey = `certificate-${monthNum}`;
 
                     let monthlyRewardData;
                     if (earnedRewards[monthKey] && earnedRewards[monthKey].reward) {
-                        monthlyRewardData = earnedRewards[monthKey]; // Use saved reward if it exists
+                        monthlyRewardData = earnedRewards[monthKey];
                     } else {
-                        // Assign new reward if not saved
                         let monthlyRewardTextValue;
                         if (completedMonthsCountOverall === 1) { 
-                            monthlyRewardTextValue = fixedMonthlyAchievementRewards[1]; // Fixed first monthly reward
+                            monthlyRewardTextValue = fixedMonthlyAchievementRewards[1];
                         } else {
-                            // For subsequent monthly achievements, pick a random one from randomRewards (non-repeating)
                             monthlyRewardTextValue = getNonRepeatingRandomReward(randomRewards, 'lastRandomReward');
                         }
-                        monthlyRewardData = { reward: monthlyRewardTextValue, used: false, type: 'monthly' }; // Save the newly assigned reward as an object
+                        monthlyRewardData = { reward: monthlyRewardTextValue, used: false, type: 'monthly' };
                         earnedRewards[monthKey] = monthlyRewardData;
                     }
 
@@ -1081,14 +1364,12 @@
                         });
                     }
 
-                    // Handle certificate achievement
-                    if (!earnedRewards[certificateKey]) { // Only add if not already present
+                    if (!earnedRewards[certificateKey]) {
                         earnedRewards[certificateKey] = { text: `תעודת הצטיינות אישית – כל הכבוד על סיום חודש ${monthNum}, מדהימה שלי!`, type: 'certificate' };
                     }
                 }
             }
 
-            // Add all bonus rewards
             for (const key in earnedRewards) {
                 if (key.startsWith('bonus-') && earnedRewards[key].type === 'bonus') {
                     bonusRewardsToRender.push({
@@ -1098,19 +1379,17 @@
                         used: earnedRewards[key].used
                     });
                 } else if (key.startsWith('certificate-') && earnedRewards[key].type === 'certificate' && !certificatesToRender.some(c => c.key === key)) {
-                    // Ensure certificates that might have been added by updateMonthCompletionDisplay are also rendered
                     certificatesToRender.push({
                         type: 'certificate',
                         key: key,
-                        month: parseInt(key.split('-')[1]), // Extract month number for sorting
+                        month: parseInt(key.split('-')[1]),
                         text: earnedRewards[key].text
                     });
                 }
             }
 
-            saveEarnedRewards(earnedRewards); // Save updated earned rewards to localStorage
+            saveEarnedRewards(earnedRewards);
 
-            // Sort and render achievements - Certificates first, then monthly, then weekly, then bonus
             certificatesToRender.sort((a, b) => a.month - b.month).forEach(item => {
                 const achievementItem = document.createElement('div');
                 achievementItem.className = 'achievement-item certificate-achievement';
@@ -1226,6 +1505,49 @@
             }
         }
 
+        // --- Progress Bars Logic ---
+        function renderProgressBars() {
+            weeklyProgressList.innerHTML = ''; // Clear previous content
+            progressMonthDisplay.textContent = currentActiveMonth; // Update month display in title
+
+            const monthWorkouts = workoutsByMonth[currentActiveMonth];
+            if (!monthWorkouts) {
+                weeklyProgressList.innerHTML = `<p class="text-center text-gray-500 text-lg">אין אימונים לחודש זה כדי להציג התקדמות.</p>`;
+                return;
+            }
+
+            const weeksInMonth = Object.keys(monthWorkouts).sort((a, b) => parseInt(a) - parseInt(b));
+
+            if (weeksInMonth.length === 0) {
+                weeklyProgressList.innerHTML = `<p class="text-center text-gray-500 text-lg">אין אימונים בחודש זה.</p>`;
+                return;
+            }
+
+            weeksInMonth.forEach(weekNum => {
+                const weekWorkouts = monthWorkouts[weekNum];
+                const requiredWorkouts = weekWorkouts.filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
+                const completedInWeek = requiredWorkouts.filter(workout => completionStatus[getWorkoutId(workout)]?.completed).length;
+                const totalRequired = requiredWorkouts.length;
+
+                let percentage = 0;
+                if (totalRequired > 0) {
+                    percentage = (completedInWeek / totalRequired) * 100;
+                }
+
+                const progressItem = document.createElement('div');
+                progressItem.className = 'weekly-progress-item';
+                progressItem.innerHTML = `
+                    <h3>שבוע ${weekNum}</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${percentage.toFixed(0)}%;">
+                            ${completedInWeek} מתוך ${totalRequired} אימונים שהושלמו
+                        </div>
+                    </div>
+                `;
+                weeklyProgressList.appendChild(progressItem);
+            });
+        }
+
 
         // --- Export Data Function (Improved with UTF-8 BOM) ---
         function exportWorkoutDataToCsv() {
@@ -1244,7 +1566,7 @@
                 const row = [
                     originalWorkout['חודש'],
                     originalWorkout['שבוע'],
-                    originalWorkout['יום'],
+                    originalWorkout['יום'], // Keep 'יום' in export for data completeness
                     originalWorkout['סוג אימון'],
                     originalWorkout['משך'],
                     originalWorkout['שפה'],
@@ -1284,58 +1606,82 @@
 
         // --- Navigation Logic ---
         function showWorkoutsPage() {
-            // Manage content display area
             document.getElementById('content-display-area').classList.remove('hidden');
             workoutContainer.classList.remove('hidden');
             achievementsContainer.classList.add('hidden');
+            progressBarsContainer.classList.add('hidden');
             document.getElementById('total-workouts-counter').classList.remove('hidden');
             
-            // Manage main navigation buttons
-            showWorkoutsBtn.classList.add('active'); // Add active class to main workout tab
-            showAchievementsBtn.classList.remove('active'); // Remove active class from main achievements tab
+            showWorkoutsBtn.classList.add('active');
+            showAchievementsBtn.classList.remove('active');
+            showProgressBtn.classList.remove('active');
             
-            // Manage month tabs visibility
-            monthTabsContainer.classList.remove('hidden'); // Show month tabs
+            monthTabsContainer.classList.remove('hidden');
             
-            currentView = 'workouts'; // Update global view state
-            localStorage.setItem('currentView', currentView); // Save to local storage
+            currentView = 'workouts';
+            localStorage.setItem('currentView', currentView);
             renderWorkouts(); 
             updateCompletedWorkoutsCounter();
         }
 
         function showAchievementsPage() {
-            // Manage content display area
             document.getElementById('content-display-area').classList.remove('hidden');
             workoutContainer.classList.add('hidden');
             achievementsContainer.classList.remove('hidden');
+            progressBarsContainer.classList.add('hidden');
             document.getElementById('total-workouts-counter').classList.add('hidden');
 
-            // Manage main navigation buttons
-            showWorkoutsBtn.classList.remove('active'); // Remove active class from main workout tab
-            showAchievementsBtn.classList.add('active'); // Add active class to main achievements tab
+            showWorkoutsBtn.classList.remove('active');
+            showAchievementsBtn.classList.add('active');
+            showProgressBtn.classList.remove('active');
             
-            // Manage month tabs visibility
-            monthTabsContainer.classList.add('hidden'); // Hide month tabs
+            monthTabsContainer.classList.add('hidden');
 
-            currentView = 'achievements'; // Update global view state
-            localStorage.setItem('currentView', currentView); // Save to local storage
-            renderAchievements(); // Render achievements when navigating to the page
+            currentView = 'achievements';
+            localStorage.setItem('currentView', currentView);
+            renderAchievements();
         }
 
-        // Attach event listeners
+        function showProgressPage() {
+            document.getElementById('content-display-area').classList.remove('hidden');
+            workoutContainer.classList.add('hidden');
+            achievementsContainer.classList.add('hidden');
+            progressBarsContainer.classList.remove('hidden');
+            document.getElementById('total-workouts-counter').classList.add('hidden');
+
+            showWorkoutsBtn.classList.remove('active');
+            showAchievementsBtn.classList.remove('active');
+            showProgressBtn.classList.add('active');
+            
+            monthTabsContainer.classList.remove('hidden'); // Keep month tabs visible for context
+
+            currentView = 'progress';
+            localStorage.setItem('currentView', currentView);
+            renderProgressBars(); // Render the progress bars
+        }
+
+        // Attach event listeners for main navigation
         showWorkoutsBtn.addEventListener('click', showWorkoutsPage);
         showAchievementsBtn.addEventListener('click', showAchievementsPage);
+        showProgressBtn.addEventListener('click', showProgressPage);
         exportDataBtn.addEventListener('click', exportWorkoutDataToCsv);
 
 
         // Initial rendering on page load
         document.addEventListener('DOMContentLoaded', () => {
-            renderMonthTabs(); // Render month tabs first
-            if (currentView === 'workouts') {
-                showWorkoutsPage();
-            } else {
-                showAchievementsPage();
+            renderMonthTabs();
+            // Always try to show workouts first, then switch if a different view was saved
+            showWorkoutsPage(); 
+
+            // After a small delay, check the saved view and switch if necessary
+            // This ensures content is shown immediately, even if it briefly flashes the "wrong" tab
+            const savedView = localStorage.getItem('currentView');
+            if (savedView === 'achievements') {
+                setTimeout(showAchievementsPage, 50); // Small delay to allow initial render
+            } else if (savedView === 'progress') {
+                setTimeout(showProgressPage, 50); // Small delay to allow initial render
             }
+            // If savedView is 'workouts', showWorkoutsPage() was already called.
         });
 
     </script>
