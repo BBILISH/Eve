@@ -367,48 +367,6 @@
             color: #dc2626; /* Red for "Used!" */
             margin-left: 1rem;
         }
-        .progress-bar-container { /* New styles for progress bars */
-            background-color: #ffffff;
-            border-radius: 1.5rem;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
-            padding: 1.5rem 2rem;
-            margin-top: 2rem;
-            margin-bottom: 2.5rem;
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-        }
-        .weekly-progress-item {
-            margin-bottom: 1.5rem;
-            text-align: right; /* Align text to the right for RTL */
-        }
-        .weekly-progress-item h3 {
-            font-weight: 700;
-            color: #4a0070; /* Dark purple */
-            margin-bottom: 0.5rem;
-            font-size: 1.25rem;
-        }
-        .progress-bar {
-            width: 100%;
-            background-color: #e0e0e0;
-            border-radius: 0.75rem;
-            overflow: hidden;
-            height: 25px; /* Height of the progress bar */
-        }
-        .progress-fill {
-            height: 100%;
-            background-color: #a21caf; /* Dark fuchsia */
-            border-radius: 0.75rem;
-            text-align: center;
-            line-height: 25px; /* Vertically align text in bar */
-            color: white;
-            font-weight: bold;
-            transition: width 0.5s ease-in-out;
-            direction: ltr; /* Ensure numbers and / are LTR inside the bar */
-            display: flex; /* Use flex to center text */
-            justify-content: center;
-            align-items: center;
-        }
         .thumbnail-img {
             width: 120px; /* Fixed width for thumbnail */
             height: 90px; /* Fixed height for thumbnail (16:9 aspect ratio) */
@@ -426,6 +384,24 @@
         .workout-item .text-details { /* New wrapper for text content */
             flex-grow: 1; /* Allow text to take remaining space */
         }
+        .add-to-calendar-btn { /* Style for add to calendar button */
+            background-color: #8b5cf6; /* Purple for consistency */
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.6rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 0.5rem; /* Space below button */
+            width: 100%; /* Make button full width in its container */
+        }
+        .add-to-calendar-btn:hover {
+            background-color: #7c3aed; /* Darker purple on hover */
+            transform: translateY(-2px);
+        }
+
 
         /* Added some responsive adjustments for thumbnail section */
         @media (max-width: 639px) { /* For mobile */
@@ -544,14 +520,13 @@
             <!-- Month buttons will be rendered here by JavaScript -->
         </div>
 
-        <!-- Main navigation buttons (Workouts / Achievements / Progress) -->
+        <!-- Main navigation buttons (Workouts / Achievements) -->
         <div id="main-navigation-buttons" class="flex justify-center gap-4 mb-8 mt-4 flex-wrap">
             <button id="show-workouts-btn" class="nav-button active">תוכנית האימונים</button>
             <button id="show-achievements-btn" class="nav-button">הישגים ופרסים</button>
-            <button id="show-progress-btn" class="nav-button">התקדמות</button>
         </div>
 
-        <!-- This div will hold either workout-container, achievements-container or progress-container -->
+        <!-- This div will hold either workout-container or achievements-container -->
         <div id="content-display-area">
             <div id="total-workouts-counter" class="total-workouts-counter">
                 סך הכל אימונים שהושלמו: <span id="completed-workouts-count">0</span>
@@ -570,19 +545,6 @@
                         <!-- Achievements will be rendered here -->
                     </div>
                     <p class="text-gray-600 text-center mt-6">כל הכבוד על ההתמדה והכוח שלך, גאה בך כל כך!</p>
-                </div>
-            </div>
-
-            <!-- Progress Bars Container -->
-            <div id="progress-bars-container" class="hidden flex justify-center">
-                <div class="progress-bar-container">
-                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-700 mb-6 text-center border-b-2 border-pink-400 pb-2">
-                        התקדמות שבועית בחודש <span id="progress-month-display"></span>
-                    </h2>
-                    <div id="weekly-progress-list">
-                        <!-- Weekly progress bars will be rendered here -->
-                    </div>
-                    <p class="text-gray-600 text-center mt-6">התמידי כך, גאה בך!</p>
                 </div>
             </div>
 
@@ -818,7 +780,7 @@
             localStorage.setItem('currentActiveMonth', currentActiveMonth);
         }
 
-        let currentView = localStorage.getItem('currentView') || 'workouts'; // 'workouts', 'achievements' or 'progress'
+        let currentView = localStorage.getItem('currentView') || 'workouts'; // Default to 'workouts'
 
 
         // Element references
@@ -826,12 +788,8 @@
         const workoutContainer = document.getElementById('workout-container');
         const achievementsContainer = document.getElementById('achievements-container');
         const achievementList = document.getElementById('achievement-list');
-        const progressBarsContainer = document.getElementById('progress-bars-container');
-        const weeklyProgressList = document.getElementById('weekly-progress-list');
-        const progressMonthDisplay = document.getElementById('progress-month-display');
         const showWorkoutsBtn = document.getElementById('show-workouts-btn');
         const showAchievementsBtn = document.getElementById('show-achievements-btn');
-        const showProgressBtn = document.getElementById('show-progress-btn');
         const exportDataBtn = document.getElementById('export-data-btn');
         const completedWorkoutsCountSpan = document.getElementById('completed-workouts-count');
         const temporaryMessageDiv = document.getElementById('temporary-message');
@@ -934,8 +892,6 @@
                     renderMonthTabs(); // Re-render tabs to update active state
                     if (currentView === 'workouts') { // Only render workouts if that's the current view
                         showWorkoutsPage(); 
-                    } else if (currentView === 'progress') { // Re-render progress bars if progress is active
-                        showProgressPage();
                     }
                 });
                 monthTabsContainer.appendChild(monthButton);
@@ -1132,7 +1088,6 @@
                 updateMonthCompletionDisplay(workoutContainer, monthNum, currentMonthWorkouts);
                 updateCompletedWorkoutsCounter();
                 renderAchievements();
-                renderProgressBars(); // Update progress bars on completion status change
             }
             // Handle WhatsApp button clicks
             else if (target.classList.contains('whatsapp-button')) {
@@ -1159,7 +1114,7 @@
                 modalWorkoutTitle.textContent = `הוסף/י את "${currentWorkoutForCalendar.title}" ליומן`;
                 // Set default date to today and time to a reasonable default
                 const today = new Date();
-                calendarDateInput.value = today.toISOString().slice(0, 10); // YYYY-MM-DD
+                calendarDateInput.value = today.toISOString().slice(0, 10); //YYYY-MM-DD
                 calendarTimeInput.value = "09:00"; // Default time
                 calendarModalOverlay.classList.add('show');
             }
@@ -1505,49 +1460,6 @@
             }
         }
 
-        // --- Progress Bars Logic ---
-        function renderProgressBars() {
-            weeklyProgressList.innerHTML = ''; // Clear previous content
-            progressMonthDisplay.textContent = currentActiveMonth; // Update month display in title
-
-            const monthWorkouts = workoutsByMonth[currentActiveMonth];
-            if (!monthWorkouts) {
-                weeklyProgressList.innerHTML = `<p class="text-center text-gray-500 text-lg">אין אימונים לחודש זה כדי להציג התקדמות.</p>`;
-                return;
-            }
-
-            const weeksInMonth = Object.keys(monthWorkouts).sort((a, b) => parseInt(a) - parseInt(b));
-
-            if (weeksInMonth.length === 0) {
-                weeklyProgressList.innerHTML = `<p class="text-center text-gray-500 text-lg">אין אימונים בחודש זה.</p>`;
-                return;
-            }
-
-            weeksInMonth.forEach(weekNum => {
-                const weekWorkouts = monthWorkouts[weekNum];
-                const requiredWorkouts = weekWorkouts.filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
-                const completedInWeek = requiredWorkouts.filter(workout => completionStatus[getWorkoutId(workout)]?.completed).length;
-                const totalRequired = requiredWorkouts.length;
-
-                let percentage = 0;
-                if (totalRequired > 0) {
-                    percentage = (completedInWeek / totalRequired) * 100;
-                }
-
-                const progressItem = document.createElement('div');
-                progressItem.className = 'weekly-progress-item';
-                progressItem.innerHTML = `
-                    <h3>שבוע ${weekNum}</h3>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${percentage.toFixed(0)}%;">
-                            ${completedInWeek} מתוך ${totalRequired} אימונים שהושלמו
-                        </div>
-                    </div>
-                `;
-                weeklyProgressList.appendChild(progressItem);
-            });
-        }
-
 
         // --- Export Data Function (Improved with UTF-8 BOM) ---
         function exportWorkoutDataToCsv() {
@@ -1609,12 +1521,10 @@
             document.getElementById('content-display-area').classList.remove('hidden');
             workoutContainer.classList.remove('hidden');
             achievementsContainer.classList.add('hidden');
-            progressBarsContainer.classList.add('hidden');
             document.getElementById('total-workouts-counter').classList.remove('hidden');
             
             showWorkoutsBtn.classList.add('active');
             showAchievementsBtn.classList.remove('active');
-            showProgressBtn.classList.remove('active');
             
             monthTabsContainer.classList.remove('hidden');
             
@@ -1628,12 +1538,10 @@
             document.getElementById('content-display-area').classList.remove('hidden');
             workoutContainer.classList.add('hidden');
             achievementsContainer.classList.remove('hidden');
-            progressBarsContainer.classList.add('hidden');
             document.getElementById('total-workouts-counter').classList.add('hidden');
 
             showWorkoutsBtn.classList.remove('active');
             showAchievementsBtn.classList.add('active');
-            showProgressBtn.classList.remove('active');
             
             monthTabsContainer.classList.add('hidden');
 
@@ -1642,28 +1550,9 @@
             renderAchievements();
         }
 
-        function showProgressPage() {
-            document.getElementById('content-display-area').classList.remove('hidden');
-            workoutContainer.classList.add('hidden');
-            achievementsContainer.classList.add('hidden');
-            progressBarsContainer.classList.remove('hidden');
-            document.getElementById('total-workouts-counter').classList.add('hidden');
-
-            showWorkoutsBtn.classList.remove('active');
-            showAchievementsBtn.classList.remove('active');
-            showProgressBtn.classList.add('active');
-            
-            monthTabsContainer.classList.remove('hidden'); // Keep month tabs visible for context
-
-            currentView = 'progress';
-            localStorage.setItem('currentView', currentView);
-            renderProgressBars(); // Render the progress bars
-        }
-
         // Attach event listeners for main navigation
         showWorkoutsBtn.addEventListener('click', showWorkoutsPage);
         showAchievementsBtn.addEventListener('click', showAchievementsPage);
-        showProgressBtn.addEventListener('click', showProgressPage);
         exportDataBtn.addEventListener('click', exportWorkoutDataToCsv);
 
 
@@ -1671,15 +1560,13 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderMonthTabs();
             // Always try to show workouts first, then switch if a different view was saved
+            // This ensures content is shown immediately, even if it briefly flashes the "wrong" tab
             showWorkoutsPage(); 
 
             // After a small delay, check the saved view and switch if necessary
-            // This ensures content is shown immediately, even if it briefly flashes the "wrong" tab
             const savedView = localStorage.getItem('currentView');
             if (savedView === 'achievements') {
                 setTimeout(showAchievementsPage, 50); // Small delay to allow initial render
-            } else if (savedView === 'progress') {
-                setTimeout(showProgressPage, 50); // Small delay to allow initial render
             }
             // If savedView is 'workouts', showWorkoutsPage() was already called.
         });
