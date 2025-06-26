@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>תוכנית אימונים אישית ומעוררת השראה</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, #fdf4ff, #faebf8); /* Very light pink/purple gradient */
+            direction: rtl; /* Set text direction to right-to-left for Hebrew */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding-top: 2rem;
+            padding-bottom: 2rem; /* Add padding at the bottom for the export button */
+        }
+        .main-container {
+            max-width: 90%;
+            width: 100%;
+            margin: 0 auto; /* Remove top/bottom margin, let body padding handle it */
+            padding: 1rem;
+            padding-top: 0; /* Adjust padding to make tabs go higher */
+        }
+        .week-card {
+            background-color: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            padding: 1.5rem 2rem;
+            margin-bottom: 2.5rem;
+            transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+            border: 2px solid transparent;
+        }
+        .week-card.week-completed {
+            border-color: #a78bfa; /* Light purple border for completed week */
+            background-color: #f3e8ff; /* Lighter purple background for completed week */
+        }
+        .week-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+        }
+        .workout-item {
+            background-color: #fffafc; /* Very light pink background for each workout */
+            border-radius: 1rem;
+            padding: 1.25rem;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            border: 1px solid #fce4ec; /* Light pink border */
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out, opacity 0.3s ease-in-out;
+            position: relative;
+            opacity: 1;
+        }
+        .workout-item.optional:not(.completed) {
+            opacity: 0.6;
+        }
+        .workout-item.completed {
+            background-color: #f9f0ff; /* Very light purple for completed */
+            border-color: #d8b4fe; /* Medium purple border */
+            opacity: 1;
+            transform: scale(1);
+        }
+        .workout-link {
+            display: inline-block;
+            background-color: #a78bfa; /* Medium purple button */
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.6rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .workout-link:hover {
+            background-color: #8b5cf6; /* Darker purple on hover */
+            transform: translateY(-2px);
+        }
+        .whatsapp-button {
+            display: inline-block;
+            background-color: #ec4899; /* Changed to pink/fuchsia to match theme */
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.6rem;
+            text-decoration: none;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            /* Margin adjusted for new button layout in actions */
+            margin-bottom: 0.5rem;
+        }
+        .whatsapp-button:hover {
+            background-color: #db2777; /* Darker pink/fuchsia on hover */
+            transform: translateY(-2px);
+        }
+        .complete-button {
+            background-color: #ec4899; /* Pink for "complete" */
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 0.6rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            font-weight: 600;
+            margin-top: 1rem; /* Adjusted to follow new whatsapp buttons */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .complete-button:hover {
+            background-color: #db2777; /* Darker pink on hover */
+            transform: translateY(-2px);
+        }
+        .complete-button.unmark { /* Style for unmark button */
+            background-color: #f43f5e; /* Rose-500 / Reddish pink for unmark */
+        }
+        .complete-button.unmark:hover {
+            background-color: #e11d48; /* Darker Rose-600 on hover */
+        }
+        .complete-button:disabled {
+            background-color: #f5d0fe; /* Light purple for disabled to match theme */
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .well-done-message {
+            color: #a21caf; /* Dark fuchsia for success messages */
+            font-weight: bold;
+            margin-top: 0.5rem;
+            display: none;
+            animation: fadeIn 0.5s forwards;
+            font-size: 1.1rem;
+        }
+
+        .week-completion-message, .month-completion-message {
+            background-color: #fde6f9; /* Light pink background for completion messages */
+            color: #a21caf; /* Dark fuchsia text for completion messages */
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            margin-top: -1rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            display: none;
+            opacity: 0;
+            animation: fadeInScale 0.7s forwards;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ffb6c1; /* Light pink confetti */
+            border-radius: 50%;
+            opacity: 0;
+            animation: confetti-fall 2s forwards;
+            z-index: 10;
+        }
+
+        @keyframes confetti-fall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(200px) rotate(720deg); opacity: 0; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* Responsive adjustments */
+        @media (min-width: 640px) {
+            .week-card {
+                padding: 2rem 3rem;
+            }
+            .workout-item {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                gap: 1rem;
+            }
+            .workout-details {
+                flex-grow: 1;
+            }
+            .workout-actions {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                gap: 0.5rem; /* Reduced gap for more compact buttons */
+            }
+            .complete-button {
+                margin-top: 0; /* Reset margin-top for desktop layout */
+            }
+            .rating-notes-section {
+                flex-basis: 100%;
+                margin-top: 1rem;
+            }
+        }
+        .nav-button {
+            background-color: #ec4899; /* Pink for navigation */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            font-weight: 600;
+            margin-top: 0; /* Adjusted to be closer to content */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .nav-button:hover {
+            background-color: #db2777; /* Darker pink on hover */
+            transform: translateY(-2px);
+        }
+        /* Style for selected tab */
+        .nav-button.active {
+            background-color: #a21caf; /* Darker pink/purple for active tab */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+        /* Styles for month tabs */
+        .month-tab-button {
+            background-color: #d8b4fe; /* Light purple for month tabs */
+            color: #4a0070; /* Dark purple text */
+            padding: 0.5rem 1.2rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .month-tab-button:hover {
+            background-color: #a78bfa; /* Medium purple on hover */
+            transform: translateY(-2px);
+        }
+        .month-tab-button.active {
+            background-color: #a21caf; /* Dark fuchsia for active month tab */
+            color: white;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+        }
+
+
+        .export-button {
+            background-color: #f7931e; /* Orange for export */
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            font-weight: 600;
+            margin-top: 3rem; /* More margin from content above */
+            margin-bottom: 2rem; /* Margin from bottom */
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            align-self: center; /* Center the button in a flex container */
+            width: fit-content; /* Adjust width to content */
+        }
+        .export-button:hover {
+            background-color: #e08000; /* Darker orange on hover */
+            transform: translateY(-2px);
+        }
+        
+        /* Styles for the temporary message */
+        .temporary-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #a21caf; /* Dark fuchsia */
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 1rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            z-index: 1000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            pointer-events: none; /* Allow clicks to pass through */
+        }
+        .temporary-message.show {
+            opacity: 1;
+        }
+
+        .achievement-card {
+            background-color: #fff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        .achievement-item {
+            background-color: #fef08a; /* Light yellow for achievements */
+            border-left: 5px solid #fbbf24; /* Amber border */
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative; /* For redeem button positioning */
+        }
+        .achievement-item.monthly-achievement {
+             background-color: #fbcfe8; /* Light pink for monthly achievement */
+             border-left: 5px solid #ec4899; /* Pink border */
+        }
+        .achievement-item.bonus-achievement {
+            background-color: #e0f2fe; /* Light blue for bonus */
+            border-left: 5px solid #38bdf8; /* Sky blue border */
+        }
+        .achievement-item.certificate-achievement {
+            background-color: #d1fae5; /* Light green for certificate */
+            border-left: 5px solid #10b981; /* Emerald green border */
+            flex-direction: column; /* Stack content for certificate */
+            text-align: center;
+            padding: 2rem;
+        }
+        .total-workouts-counter {
+            background-color: #fbcfe8; /* Light pink for counter */
+            color: #be185d; /* Dark pink text */
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.75rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .redeem-button {
+            background-color: #4CAF50; /* Green for redeem */
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s ease-in-out, transform 0.2s ease-in-out;
+            font-weight: 600;
+            margin-right: 1rem; /* Space from text */
+            flex-shrink: 0; /* Prevent button from shrinking */
+        }
+        .redeem-button:hover {
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+        .redeem-button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .achievement-content {
+            flex-grow: 1;
+        }
+        .achievement-status {
+            font-weight: bold;
+            color: #dc2626; /* Red for "Used!" */
+            margin-left: 1rem;
+        }
+
+        /* Progress bar styles removed */
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="main-container">
+        <h1 class="text-3xl sm:text-5xl font-extrabold text-gray-800 mb-4 text-center leading-tight">
+            היי חיימשלי, <span class="text-pink-600">תוכנית האימונים שלך</span> מחכה!
+        </h1>
+        <p class="text-xl sm:text-2xl text-gray-600 mb-8 text-center">אני איתך בכל צעד ובכל אימון תמיד כאן איתך ובשבילך ❤️</p>
+
+        <!-- New: Month Tabs Container -->
+        <div id="month-tabs-container" class="flex justify-center gap-4 mb-8">
+            <!-- Month buttons will be rendered here by JavaScript -->
+        </div>
+
+        <!-- Main navigation buttons (Workouts / Achievements) -->
+        <div id="main-navigation-buttons" class="flex justify-center gap-4 mb-8 mt-4">
+            <button id="show-workouts-btn" class="nav-button active">תוכנית האימונים</button>
+            <button id="show-achievements-btn" class="nav-button">הישגים ופרסים</button>
+        </div>
+
+        <!-- This div will hold either workout-container or achievements-container -->
+        <div id="content-display-area">
+            <div id="total-workouts-counter" class="total-workouts-counter">
+                סך הכל אימונים שהושלמו: <span id="completed-workouts-count">0</span>
+            </div>
+
+            <div id="workout-container">
+                <!-- Workout data for the selected month will be rendered here by JavaScript -->
+            </div>
+
+            <div id="achievements-container" class="hidden">
+                <div class="achievement-card">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-gray-700 mb-6 text-center border-b-2 border-pink-400 pb-2">
+                        הישגים מדהימים שלך! 🏆
+                    </h2>
+                    <div id="achievement-list">
+                        <!-- Achievements will be rendered here -->
+                    </div>
+                    <p class="text-gray-600 text-center mt-6">כל הכבוד על ההתמדה והכוח שלך, גאה בך כל כך!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Export Button at the bottom -->
+    <button id="export-data-btn" class="export-button">יצא נתונים לאקסל</button>
+
+    <!-- Temporary Message Container -->
+    <div id="temporary-message" class="temporary-message"></div>
+
+    <script>
+        // Define the CSV data as a multi-line string
+        const csvData = `חודש,שבוע,יום,סוג אימון,משך,שפה,תיאור,קישור
+1,1,ראשון,יוגה זרימה למתחילים,30 דק',עברית,"תרגול עדין, זרימה ונשימה",https://www.youtube.com/watch?v=0h7taISrO7c
+1,1,שלישי,פילאטיס גוף מלא למתחילים,30 דק',עברית,חיזוק ליבה ורגליים ללא ציוד,https://www.youtube.com/watch?v=QW_0H-5udr0
+1,1,שישי,יין יוגה מרגיעה (אופציונלי),30 דק',אנגלית,תנוחות עמוקות להרפיה,https://www.youtube.com/watch?v=sVqH6qPDdh0
+1,2,ראשון,פילאטיס בוקר אנרגטי,30 דק',אנגלית,אימון פילאטיס מחזק וממריץ,https://www.youtube.com/watch?v=cTsZweJPois
+1,2,שלישי,יוגה לכתפיים וגב עליון,30 דק',עברית,שחרור מתחיו חיזוק הגב,https://www.youtube.com/watch?v=SJQEV7DLU34
+1,2,חמישי,פילאטיס גוף מלא לבוקר,30 דק',אנגלית,חיזוק גוף כולל ועיצוב ליבה,https://www.youtube.com/watch?v=G3O9FRAEPG4
+1,3,ראשון,שילוב יוגה + פילאטיס,30 דק',אנגלית,"אימון משולב, תנועה וחיזוק",https://www.youtube.com/watch?v=NJU8dcCacRY
+1,3,שלישי,יוגה זרימה למתחילים (Adriene),30 דק',אנגלית,זרימה עדינה ותנוחות בסיסיות,https://www.youtube.com/watch?v=AB3Y-4a3ZrU
+1,3,שבת,יוגה רסטורטיבית מפנקת (אופציונלי),45 דק',אנגלית,"יוגה רגועה, נשימה ושחרור",https://www.youtube.com/watch?v=NhCRvb9498A
+1,4,ראשון,יוגה בוקר מרעננת,30 דק',אנגלית,מתיחות קלות לפתיחת היום,https://www.youtube.com/watch?v=8aamtgabSP0
+1,4,שלישי,פילאטיס גוף מלא לבוקר,30 דק',אנגלית,חיזוק הליבה ורגליים,https://www.youtube.com/watch?v=cTsZweJPois
+1,4,חמישי,יוגה זרימה רגועה,40 דק',עברית,אימון זורם עם פתיחות למתחילות,https://www.youtube.com/watch?v=IBTdBA_lIZI`;
+
+
+        // Function to parse CSV data
+        function parseCSV(csv) {
+            const lines = csv.split('\n');
+            // Fixed the typo: lines[0].1split(',') -> lines[0].split(',')
+            const headers = lines[0].split(',');
+            const result = [];
+
+            for (let i = 1; i < lines.length; i++) {
+                const currentLine = lines[i];
+                const regex = /(?:^|,)(?:"([^"]*)"|([^,]*))/g;
+                let match;
+                const values = [];
+                // Ensure to reset regex lastIndex for each line if using global flag
+                regex.lastIndex = 0; 
+                while (match = regex.exec(currentLine)) {
+                    values.push(match[1] || match[2] || '');
+                }
+
+                if (values.length === headers.length) {
+                    const obj = {};
+                    for (let j = 0; j < headers.length; j++) {
+                        obj[headers[j].trim()] = values[j].trim().replace(/^"|"$/g, '');
+                    }
+                    result.push(obj);
+                }
+            }
+            return result;
+        }
+
+        // Function to get a unique ID for each workout including month
+        function getWorkoutId(workout) {
+            const cleanedWorkoutType = workout['סוג אימון'].replace(/\s\(אופציונלי\)/g, '').replace(/\s/g, '-');
+            return `month-${workout['חודש']}-week-${workout['שבוע']}-day-${workout['יום'].replace(/\s/g, '-')}-type-${cleanedWorkoutType}`;
+        }
+
+        // Function to load completion status and data from localStorage
+        function loadCompletionStatus() {
+            try {
+                const status = localStorage.getItem('workoutCompletionData');
+                return status ? JSON.parse(status) : {};
+            } catch (e) {
+                console.error("Error loading completion status from localStorage:", e);
+                return {};
+            }
+        }
+
+        // Function to save completion status and data to localStorage
+        function saveCompletionStatus(status) {
+            try {
+                localStorage.setItem('workoutCompletionData', JSON.stringify(status));
+            } catch (e) {
+                console.error("Error saving completion status to localStorage:", e);
+            }
+        }
+
+        // Function to load earned rewards from localStorage
+        function loadEarnedRewards() {
+            try {
+                const rewards = localStorage.getItem('earnedRewards');
+                return rewards ? JSON.parse(rewards) : {};
+            } catch (e) {
+                console.error("Error loading earned rewards from localStorage:", e);
+                return {};
+            }
+        }
+
+        // Function to save earned rewards to localStorage
+        function saveEarnedRewards(rewards) {
+            try {
+                localStorage.setItem('earnedRewards', JSON.stringify(rewards));
+            } catch (e) {
+                console.error("Error saving earned rewards to localStorage:", e);
+            }
+        }
+
+        // --- Motivational Messages after completing a workout ---
+        const wellDoneMessages = [
+            "את כלכך שווה!❤️",
+            "אני רוצה אותך כלכך❤️❤️❤️",
+            "את כלכך סקסית❤️",
+            "אני צופה בך כשאת ישנה....",
+            "כל הכבוד על האימון אני ממש גאה בך!❤️",
+            "אהובתי את כלכך טובה!",
+            "את ממש משמחת אותי!!",
+            "את כלכך חמודה!!"
+        ];
+
+        // Global index for sequential well-done messages
+        let currentWellDoneMessageIndex = parseInt(localStorage.getItem('currentWellDoneMessageIndex') || '0');
+        
+        /**
+         * Get the next well-done message in sequence.
+         * Cycles back to the beginning if the end of the array is reached.
+         * Saves the current index to localStorage.
+         * @returns {string} The next well-done message.
+         */
+        function getNextWellDoneMessage() {
+            const message = wellDoneMessages[currentWellDoneMessageIndex];
+            currentWellDoneMessageIndex = (currentWellDoneMessageIndex + 1) % wellDoneMessages.length;
+            localStorage.setItem('currentWellDoneMessageIndex', currentWellDoneMessageIndex.toString());
+            return message;
+        }
+
+        // --- Achievement Rewards ---
+        const fixedWeeklyAchievementRewards = {
+            1: "אני אגע בך🔞...", // Special phrasing directly here
+        };
+        const fixedMonthlyAchievementRewards = {
+            1: "אני אקח אותך לדייט עליי❤️" // Special phrasing directly here
+        };
+
+        const randomRewards = [
+            "נתנשק המון",
+            "נראה סרט לבחירתך",
+            "אעשה לך מסאז' רבע שעה",
+            "נעשה משהו שאת רוצה",
+            "נעשה משהו שאת רוצה... 🔞",
+            "אני אנשק את כל הגוף שלך❤️"
+        ];
+        
+        // Global variable to store the last random reward shown (for regular rewards and bonus)
+        let lastRandomReward = localStorage.getItem('lastRandomReward') || null;
+        let lastBonusReward = localStorage.getItem('lastBonusReward') || null;
+
+
+        /**
+         * Get a random reward that is not the same as the last one from a given list.
+         * Tries up to (list.length * 2) times to find a different reward.
+         * Updates the corresponding last reward in localStorage.
+         * @param {Array<string>} rewardList - The list of rewards to choose from.
+         * @param {string} lastRewardKey - The localStorage key for the last chosen reward.
+         * @returns {string} A random reward.
+         */
+        function getNonRepeatingRandomReward(rewardList, lastRewardKey) {
+            let currentLastReward = localStorage.getItem(lastRewardKey) || null;
+
+            // If there's only one reward, it has to repeat
+            if (rewardList.length <= 1) {
+                localStorage.setItem(lastRewardKey, rewardList[0]);
+                return rewardList[0];
+            }
+
+            let newReward = rewardList[Math.floor(Math.random() * rewardList.length)];
+            let attempts = 0;
+            while (newReward === currentLastReward && attempts < rewardList.length * 2) { // Try a few times
+                newReward = rewardList[Math.floor(Math.random() * rewardList.length)];
+                attempts++;
+            }
+            localStorage.setItem(lastRewardKey, newReward);
+            return newReward;
+        }
+
+
+        // Process the parsed data
+        const workouts = parseCSV(csvData);
+        let completionStatus = loadCompletionStatus(); // Load from localStorage initially
+
+        // Ensure each workout has an initial entry in completionStatus if not already there
+        workouts.forEach(workout => {
+            const workoutId = getWorkoutId(workout);
+            if (!completionStatus[workoutId]) {
+                completionStatus[workoutId] = { completed: false, rating: null, notes: "" };
+            }
+        });
+        saveCompletionStatus(completionStatus); // Save initial state if new workouts added
+
+        // Group workouts by month, then by week
+        const workoutsByMonth = workouts.reduce((acc, workout) => {
+            const month = workout['חודש'];
+            if (!acc[month]) {
+                acc[month] = {};
+            }
+            const week = workout['שבוע'];
+            if (!acc[month][week]) {
+                acc[month][week] = [];
+            }
+            acc[month][week].push(workout);
+            return acc;
+        }, {});
+
+        // Extract all unique month numbers
+        const availableMonths = Object.keys(workoutsByMonth).sort((a, b) => parseInt(a) - parseInt(b));
+
+        // Global state variables
+        let currentActiveMonth = localStorage.getItem('currentActiveMonth') || (availableMonths.length > 0 ? availableMonths[0] : null);
+        // Ensure currentActiveMonth is still valid after previous changes (e.g., if month '2' was active but is now removed)
+        if (currentActiveMonth && !availableMonths.includes(currentActiveMonth)) {
+            currentActiveMonth = availableMonths.length > 0 ? availableMonths[0] : null;
+            localStorage.setItem('currentActiveMonth', currentActiveMonth);
+        }
+
+        let currentView = localStorage.getItem('currentView') || 'workouts'; // 'workouts' or 'achievements'
+
+
+        // Element references
+        const monthTabsContainer = document.getElementById('month-tabs-container'); // New month tabs container
+        const workoutContainer = document.getElementById('workout-container');
+        const achievementsContainer = document.getElementById('achievements-container');
+        const achievementList = document.getElementById('achievement-list'); // Corrected reference
+        const showWorkoutsBtn = document.getElementById('show-workouts-btn');
+        const showAchievementsBtn = document.getElementById('show-achievements-btn');
+        const exportDataBtn = document.getElementById('export-data-btn'); // Get the export button
+        const completedWorkoutsCountSpan = document.getElementById('completed-workouts-count');
+        const temporaryMessageDiv = document.getElementById('temporary-message'); // Reference to the temporary message div
+
+        const WHATSAPP_NUMBER = '972584480705'; // Your WhatsApp number without the '+'
+
+        /**
+         * Displays a temporary message in the center of the screen.
+         * @param {string} messageText - The text to display.
+         * @param {number} duration - How long to display the message in milliseconds.
+         */
+        function showTemporaryMessage(messageText, duration = 1000) { // Default duration 1 second
+            temporaryMessageDiv.textContent = messageText;
+            temporaryMessageDiv.classList.add('show');
+            // Remove the 'show' class after duration to hide it
+            setTimeout(() => {
+                temporaryMessageDiv.classList.remove('show');
+            }, duration);
+        }
+
+        // Function to check if a week is completed (only required workouts)
+        function isWeekCompleted(monthNum, weekNum, weekWorkouts) {
+            const requiredWorkouts = weekWorkouts.filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
+            if (requiredWorkouts.length === 0) return true; // If no required workouts, week is considered complete
+            return requiredWorkouts.every(workout => {
+                const workoutId = getWorkoutId(workout);
+                return completionStatus[workoutId]?.completed;
+            });
+        }
+
+        // Function to check if a month is completed (only required workouts)
+        function isMonthCompleted(monthNum, monthWorkouts) {
+            const allRequiredWorkoutsInMonth = Object.values(monthWorkouts).flat().filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
+            if (allRequiredWorkoutsInMonth.length === 0) return true; // If no required workouts, month is considered complete
+            return allRequiredWorkoutsInMonth.every(workout => {
+                const workoutId = getWorkoutId(workout);
+                return completionStatus[workoutId]?.completed;
+            });
+        }
+
+        // Function to update week completion display
+        function updateWeekCompletionDisplay(weekCard, monthNum, weekNum, weekWorkouts) {
+            const completionMessage = weekCard.querySelector('.week-completion-message');
+            const weekTitle = weekCard.querySelector('h2');
+            
+            const existingHeart = weekTitle.querySelector('.week-heart');
+            if (existingHeart) {
+                existingHeart.remove();
+            }
+
+            if (isWeekCompleted(monthNum, weekNum, weekWorkouts)) {
+                if (completionMessage) {
+                    completionMessage.style.display = 'block';
+                    completionMessage.style.opacity = '1';
+                    weekCard.classList.add('week-completed');
+                }
+                const heart = document.createElement('span');
+                heart.className = 'week-heart text-red-500 mr-2 ml-1 text-2xl inline-block align-middle';
+                heart.textContent = '❤️';
+                weekTitle.appendChild(heart);
+
+            } else {
+                if (completionMessage) {
+                    completionMessage.style.display = 'none';
+                    completionMessage.style.opacity = '0';
+                    weekCard.classList.remove('week-completed');
+                }
+            }
+        }
+
+        // Function to update total completed workouts counter
+        function updateCompletedWorkoutsCounter() {
+            const completedCount = Object.values(completionStatus).filter(data => data.completed).length;
+            completedWorkoutsCountSpan.textContent = completedCount;
+        }
+
+        // Render the month tabs
+        function renderMonthTabs() {
+            monthTabsContainer.innerHTML = ''; // Clear previous tabs
+            availableMonths.forEach(month => {
+                const monthButton = document.createElement('button');
+                monthButton.className = `month-tab-button ${month === currentActiveMonth ? 'active' : ''}`;
+                monthButton.textContent = `חודש ${month}`;
+                monthButton.dataset.month = month;
+                monthButton.addEventListener('click', () => {
+                    currentActiveMonth = month;
+                    localStorage.setItem('currentActiveMonth', currentActiveMonth);
+                    renderMonthTabs(); // Re-render tabs to update active state
+                    showWorkoutsPage(); // Show workouts for the newly selected month
+                });
+                monthTabsContainer.appendChild(monthButton);
+            });
+        }
+
+        // Render workouts for the current active month
+        function renderWorkouts() {
+            workoutContainer.innerHTML = ''; // Clear previous content
+
+            const monthWorkouts = workoutsByMonth[currentActiveMonth];
+            if (!monthWorkouts) {
+                // Display message if no workouts for this month
+                const noWorkoutsMessage = document.createElement('p');
+                noWorkoutsMessage.className = 'text-center text-gray-500 text-lg mt-8';
+                noWorkoutsMessage.textContent = 'אין אימונים לחודש זה.';
+                workoutContainer.appendChild(noWorkoutsMessage);
+
+                // Also ensure the month completion message is hidden if no workouts for this month
+                // This line was causing an error as it was looking for previous sibling directly.
+                // The month completion message is now appended *after* the month heading.
+                // It's better to update it directly if it exists based on currentActiveMonth.
+                const monthCompletionMessage = document.querySelector(`.month-completion-message`); // Selecting more generally
+                if (monthCompletionMessage) { // If it exists from a previous render
+                    monthCompletionMessage.style.display = 'none';
+                }
+                return;
+            }
+
+            const monthHeading = document.createElement('h2');
+            monthHeading.className = 'text-3xl sm:text-4xl font-extrabold text-pink-700 mb-8 text-center mt-10';
+            monthHeading.textContent = `חודש ${currentActiveMonth}`;
+            monthHeading.dataset.monthHeading = currentActiveMonth; // Add data attribute for easier selection
+            workoutContainer.appendChild(monthHeading);
+
+            const monthCompletionMessage = document.createElement('div');
+            monthCompletionMessage.className = 'month-completion-message mb-8';
+            monthCompletionMessage.textContent = `כל הכבוד על השלמת חודש ${currentActiveMonth} מדהימה שלי! ❤️`;
+            workoutContainer.appendChild(monthCompletionMessage); // Append after month heading
+
+
+            for (const weekNum in monthWorkouts) {
+                const weekWorkouts = monthWorkouts[weekNum];
+
+                const weekCard = document.createElement('div');
+                weekCard.className = 'week-card mb-8 p-6 rounded-2xl shadow-lg';
+                weekCard.dataset.month = currentActiveMonth;
+
+                const weekTitle = document.createElement('h2');
+                weekTitle.className = 'text-2xl sm:text-3xl font-bold text-gray-700 mb-6 border-b-2 border-pink-400 pb-2 text-center';
+                weekTitle.textContent = `שבוע ${weekNum}`;
+                weekCard.appendChild(weekTitle);
+
+                const weekCompletionMessage = document.createElement('div');
+                weekCompletionMessage.className = 'week-completion-message';
+                weekCompletionMessage.textContent = 'כל הכבוד על השבוע המדהים!';
+                weekCard.appendChild(weekCompletionMessage);
+
+                weekWorkouts.forEach(workout => {
+                    const workoutId = getWorkoutId(workout);
+                    const workoutData = completionStatus[workoutId];
+                    const isCompleted = workoutData?.completed;
+                    const initialRating = workoutData?.rating || '';
+                    const initialNotes = workoutData?.notes || '';
+                    
+                    const isOptional = workout['סוג אימון'].includes('(אופציונלי)');
+                    
+                    const workoutItem = document.createElement('div');
+                    workoutItem.className = `workout-item bg-gray-50 p-4 mb-4 rounded-xl border border-gray-200 ${isCompleted ? 'completed' : ''} ${isOptional && !isCompleted ? 'optional' : ''}`;
+                    workoutItem.dataset.workoutId = workoutId; // Add workoutId to item for easier targeting
+
+                    let ratingOptions = '<option value="">דרגי</option>'; /* Changed to נקבה */
+                    for (let i = 1; i <= 10; i++) {
+                        ratingOptions += `<option value="${i}" ${initialRating == i ? 'selected' : ''}>${i}</option>`;
+                    }
+
+                    workoutItem.innerHTML = `
+                        <div class="workout-details flex-grow">
+                            <h3 class="text-xl font-semibold text-gray-700 mb-2">${workout['סוג אימון']}</h3>
+                            <p class="text-gray-600"><span class="font-medium">יום:</span> ${workout['יום']}</p>
+                            <p class="text-gray-600"><span class="font-medium">משך:</span> ${workout['משך']}</p>
+                            <p class="text-gray-600 mb-3">${workout['תיאור']}</p>
+                        </div>
+                        <div class="workout-actions flex flex-col items-center sm:items-end w-full sm:w-auto">
+                            <button class="whatsapp-button whatsapp-before-button mb-2 w-full sm:w-auto" data-message="יפה שלי ❤️" data-whatsapp-link="https://wa.me/${WHATSAPP_NUMBER}?text=היי הדר, אני מתחילה אימון ${workout['סוג אימון']}! הנה תמונה שלי לפני...">
+                                שלחי תמונה לפני האימון
+                            </button>
+                            <a href="${workout['קישור']}" target="_blank" class="workout-link mb-2 w-full sm:w-auto">
+                                צפי באימון ביוטיוב
+                            </a>
+                            <button class="whatsapp-button whatsapp-after-button mb-2 w-full sm:w-auto" data-message="יפה שלי ❤️" data-whatsapp-link="https://wa.me/${WHATSAPP_NUMBER}?text=היי הדר, סיימתי אימון ${workout['סוג אימון']}! הנה תמונה שלי אחרי...">
+                                שלחי תמונה אחרי האימון
+                            </button>
+                            <button class="complete-button w-full sm:w-auto ${isCompleted ? 'unmark' : ''}" data-workout-id="${workoutId}">
+                                ${isCompleted ? 'בטלי סימון' : 'סיימתי!'}
+                            </button>
+                            <span class="well-done-message ${isCompleted ? 'block' : 'hidden'}">${isCompleted ? getNextWellDoneMessage() : ''}</span>
+                        </div>
+                        <div class="rating-notes-section w-full mt-4 sm:mt-0">
+                            <label for="rating-${workoutId}" class="block text-gray-600 text-sm font-medium mb-1">דירוג (1-10):</label>
+                            <select id="rating-${workoutId}" class="w-full p-2 border border-gray-300 rounded-md mb-2 bg-white text-gray-700" data-workout-id="${workoutId}">
+                                ${ratingOptions}
+                            </select>
+                            <label for="notes-${workoutId}" class="block text-gray-600 text-sm font-medium mb-1">הערות:</label>
+                            <textarea id="notes-${workoutId}" class="w-full p-2 border border-gray-300 rounded-md h-20 resize-y bg-white text-gray-700" placeholder="הוסיפי הערות על האימון..." data-workout-id="${workoutId}">${initialNotes}</textarea>
+                        </div>
+                    `;
+                    weekCard.appendChild(workoutItem);
+
+                });
+                workoutContainer.appendChild(weekCard);
+
+                updateWeekCompletionDisplay(weekCard, currentActiveMonth, weekNum, weekWorkouts);
+            }
+            updateMonthCompletionDisplay(workoutContainer, currentActiveMonth, monthWorkouts);
+        }
+
+        // Delegated event listener for all dynamic buttons/inputs within content-display-area
+        // Changed listener to content-display-area, more robust for all dynamic elements
+        document.getElementById('content-display-area').addEventListener('click', function(event) {
+            const target = event.target;
+            // Handle complete button click
+            if (target.classList.contains('complete-button')) {
+                const button = target;
+                const workoutId = button.dataset.workoutId;
+                const workoutItem = button.closest('.workout-item');
+                const weekCard = button.closest('.week-card');
+                // Ensure weekTitle is correctly extracted from the actual week card it belongs to
+                const weekTitleElement = weekCard.querySelector('h2');
+                const weekNum = weekTitleElement ? weekTitleElement.textContent.replace('שבוע ', '') : null;
+                const monthNum = weekCard.dataset.month;
+
+                if (!weekNum || !monthNum) {
+                    console.error("Could not determine week or month for workoutId:", workoutId);
+                    return; // Exit if essential data is missing
+                }
+
+                let currentData = completionStatus[workoutId] || { completed: false, rating: null, notes: "" };
+
+                if (!currentData.completed) {
+                    currentData.completed = true;
+                    workoutItem.classList.remove('optional');
+                    workoutItem.classList.add('completed');
+                    button.textContent = 'בטלי סימון';
+                    button.classList.add('unmark');
+                    const wellDoneSpan = workoutItem.querySelector('.well-done-message');
+                    wellDoneSpan.textContent = getNextWellDoneMessage(); // Get next message sequentially
+                    wellDoneSpan.style.display = 'block';
+                    // Optional: createConfetti(button); // Re-enable if you want confetti back
+
+                    // Check for bonus reward chance - now from randomRewards list
+                    if (Math.random() < 0.15) { // 15% chance for a bonus reward
+                        const bonusRewardText = getNonRepeatingRandomReward(randomRewards, 'lastBonusReward'); // Use randomRewards here
+                        const bonusKey = `bonus-${Date.now()}`; // Unique key for bonus reward
+                        let earnedRewards = loadEarnedRewards();
+                        earnedRewards[bonusKey] = { reward: bonusRewardText, used: false, type: 'bonus' };
+                        saveEarnedRewards(earnedRewards);
+                        showTemporaryMessage(`קיבלת פרס בונוס: ${bonusRewardText}!`); // Show bonus message
+                    }
+
+                } else {
+                    currentData.completed = false;
+                    workoutItem.classList.remove('completed');
+                    const originalWorkout = workouts.find(w => getWorkoutId(w) === workoutId);
+                    if (originalWorkout && originalWorkout['סוג אימון'].includes('(אופציונלי)')) {
+                        workoutItem.classList.add('optional');
+                    }
+                    button.textContent = 'סיימתי!';
+                    button.classList.remove('unmark');
+                    workoutItem.querySelector('.well-done-message').style.display = 'none';
+                }
+                completionStatus[workoutId] = currentData;
+                saveCompletionStatus(completionStatus); // Save to localStorage
+
+                const currentWeekWorkouts = workoutsByMonth[monthNum][weekNum];
+                updateWeekCompletionDisplay(weekCard, monthNum, weekNum, currentWeekWorkouts);
+                const currentMonthWorkouts = workoutsByMonth[monthNum];
+                updateMonthCompletionDisplay(workoutContainer, monthNum, currentMonthWorkouts);
+                updateCompletedWorkoutsCounter();
+                renderAchievements(); // Re-render achievements to show new rewards/certificates
+            }
+            // Handle WhatsApp button clicks
+            else if (target.classList.contains('whatsapp-button')) {
+                event.preventDefault(); // Prevent default link behavior
+                const message = target.dataset.message;
+                const whatsappLink = target.dataset.whatsappLink;
+
+                if (message) {
+                    showTemporaryMessage(message);
+                }
+                setTimeout(() => {
+                    window.open(whatsappLink, '_blank');
+                }, 1000); // 1 second delay
+            }
+        });
+
+        document.getElementById('content-display-area').addEventListener('change', function(event) {
+            const target = event.target;
+            if (target.tagName === 'SELECT' && target.id.startsWith('rating-')) {
+                const select = target;
+                const workoutId = select.dataset.workoutId;
+                let currentData = completionStatus[workoutId] || { completed: false, rating: null, notes: "" };
+                currentData.rating = select.value === "" ? null : parseInt(select.value);
+                completionStatus[workoutId] = currentData;
+                saveCompletionStatus(completionStatus); // Save to localStorage
+            }
+        });
+
+        document.getElementById('content-display-area').addEventListener('input', function(event) {
+            const target = event.target;
+            if (target.tagName === 'TEXTAREA' && target.id.startsWith('notes-')) {
+                const textarea = target;
+                const workoutId = textarea.dataset.workoutId;
+                let currentData = completionStatus[workoutId] || { completed: false, rating: null, notes: "" };
+                currentData.notes = textarea.value;
+                completionStatus[workoutId] = currentData;
+                saveCompletionStatus(completionStatus); // Save to localStorage
+            }
+        });
+
+
+        // --- Redeem Reward Function ---
+        function redeemReward(rewardKey) {
+            let earnedRewards = loadEarnedRewards();
+            if (earnedRewards[rewardKey] && !earnedRewards[rewardKey].used) {
+                earnedRewards[rewardKey].used = true;
+                saveEarnedRewards(earnedRewards);
+                renderAchievements(); // Re-render achievements to update display
+            }
+        }
+
+
+        // Function to update month completion display and trigger certificate
+        function updateMonthCompletionDisplay(container, monthNum, monthWorkouts) {
+            // Select the month completion message specific to the current active month, or the most recently rendered one
+            const monthCompletionMessage = container.querySelector(`.month-completion-message`);
+
+            if (!monthCompletionMessage) {
+                // This scenario might happen if renderWorkouts() returned early due to no workouts
+                console.warn("Month completion message element not found for month:", monthNum, ". Skipping update.");
+                return; 
+            }
+
+            let earnedRewards = loadEarnedRewards();
+            const certificateKey = `certificate-${monthNum}`; // Key for certificate
+
+            if (isMonthCompleted(monthNum, monthWorkouts)) {
+                monthCompletionMessage.style.display = 'block';
+                monthCompletionMessage.style.opacity = '1';
+                
+                // Generate certificate if not already generated
+                if (!earnedRewards[certificateKey]) {
+                    earnedRewards[certificateKey] = { text: `תעודת הצטיינות אישית – כל הכבוד על סיום חודש ${monthNum}, מדהימה שלי!`, type: 'certificate' };
+                    saveEarnedRewards(earnedRewards);
+                    renderAchievements(); // Re-render achievements to show the new certificate
+                }
+
+            } else {
+                monthCompletionMessage.style.display = 'none';
+                monthCompletionMessage.style.opacity = '0';
+            }
+        }
+
+
+        // Render the achievements view
+        function renderAchievements() {
+            achievementList.innerHTML = ''; // Clear previous content
+            let completedWeeksCountOverall = 0;
+            let completedMonthsCountOverall = 0;
+            let earnedRewards = loadEarnedRewards(); // Load rewards from storage
+
+            // Separate arrays for rendering order
+            const weeklyRewardsToRender = [];
+            const monthlyRewardsToRender = [];
+            const bonusRewardsToRender = [];
+            const certificatesToRender = [];
+
+            // Populate weekly and monthly rewards
+            for (const monthNum in workoutsByMonth) {
+                const currentMonthWorkouts = workoutsByMonth[monthNum];
+
+                // Check weekly achievements within this month
+                for (const weekNum in currentMonthWorkouts) {
+                    const weekWorkouts = currentMonthWorkouts[weekNum];
+                    // Only count "required" workouts for week completion check
+                    const requiredWorkoutsInWeek = weekWorkouts.filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
+                    const completedRequiredWorkoutsInWeek = requiredWorkoutsInWeek.filter(workout => completionStatus[getWorkoutId(workout)]?.completed).length;
+
+                    if (requiredWorkoutsInWeek.length > 0 && completedRequiredWorkoutsInWeek === requiredWorkoutsInWeek.length) {
+                        completedWeeksCountOverall++;
+                        const weekKey = `week-${monthNum}-${weekNum}`; // Unique key for this week's reward
+
+                        let rewardData;
+                        if (earnedRewards[weekKey]) {
+                            rewardData = earnedRewards[weekKey]; // Use saved reward if it exists
+                        } else {
+                            // Assign new reward if not saved
+                            let rewardTextValue;
+                            if (completedWeeksCountOverall === 1) {
+                                rewardTextValue = fixedWeeklyAchievementRewards[1]; // Fixed first weekly reward
+                            } else {
+                                // For subsequent weekly achievements, pick a random one, ensuring no immediate repeat
+                                rewardTextValue = getNonRepeatingRandomReward(randomRewards, 'lastRandomReward');
+                            }
+                            rewardData = { reward: rewardTextValue, used: false, type: 'weekly' }; // Save the newly assigned reward as an object
+                            earnedRewards[weekKey] = rewardData;
+                        }
+                        if (rewardData.reward) {
+                            weeklyRewardsToRender.push({
+                                type: 'weekly',
+                                key: weekKey,
+                                month: monthNum,
+                                week: weekNum,
+                                reward: rewardData.reward,
+                                used: rewardData.used
+                            });
+                        }
+                    }
+                }
+
+                // Check monthly achievements (after all weeks for the month have been processed)
+                // Only count "required" workouts for month completion check
+                const allRequiredWorkoutsInMonth = Object.values(currentMonthWorkouts).flat().filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
+                const completedAllRequiredWorkoutsInMonth = allRequiredWorkoutsInMonth.filter(workout => completionStatus[getWorkoutId(workout)]?.completed).length;
+
+                if (allRequiredWorkoutsInMonth.length > 0 && completedAllRequiredWorkoutsInMonth === allRequiredWorkoutsInMonth.length) {
+                    completedMonthsCountOverall++;
+                    const monthKey = `month-${monthNum}`; // Unique key for this month's reward
+                    const certificateKey = `certificate-${monthNum}`; // Key for certificate
+
+                    let monthlyRewardData;
+                    if (earnedRewards[monthKey] && earnedRewards[monthKey].reward) {
+                        monthlyRewardData = earnedRewards[monthKey]; // Use saved reward if it exists
+                    } else {
+                        // Assign new reward if not saved
+                        let monthlyRewardTextValue;
+                        if (completedMonthsCountOverall === 1) { 
+                            monthlyRewardTextValue = fixedMonthlyAchievementRewards[1]; // Fixed first monthly reward
+                        } else {
+                            // For subsequent monthly achievements, pick a random one from randomRewards (non-repeating)
+                            monthlyRewardTextValue = getNonRepeatingRandomReward(randomRewards, 'lastRandomReward');
+                        }
+                        monthlyRewardData = { reward: monthlyRewardTextValue, used: false, type: 'monthly' }; // Save the newly assigned reward as an object
+                        earnedRewards[monthKey] = monthlyRewardData;
+                    }
+
+                    if (monthlyRewardData.reward) {
+                        monthlyRewardsToRender.push({
+                            type: 'monthly',
+                            key: monthKey,
+                            month: monthNum,
+                            reward: monthlyRewardData.reward,
+                            used: monthlyRewardData.used
+                        });
+                    }
+
+                    // Handle certificate achievement
+                    if (!earnedRewards[certificateKey]) { // Only add if not already present
+                        earnedRewards[certificateKey] = { text: `תעודת הצטיינות אישית – כל הכבוד על סיום חודש ${monthNum}, מדהימה שלי!`, type: 'certificate' };
+                    }
+                }
+            }
+
+            // Add all bonus rewards
+            for (const key in earnedRewards) {
+                if (key.startsWith('bonus-') && earnedRewards[key].type === 'bonus') {
+                    bonusRewardsToRender.push({
+                        type: 'bonus',
+                        key: key,
+                        reward: earnedRewards[key].reward,
+                        used: earnedRewards[key].used
+                    });
+                } else if (key.startsWith('certificate-') && earnedRewards[key].type === 'certificate' && !certificatesToRender.some(c => c.key === key)) {
+                    // Ensure certificates that might have been added by updateMonthCompletionDisplay are also rendered
+                    certificatesToRender.push({
+                        type: 'certificate',
+                        key: key,
+                        month: parseInt(key.split('-')[1]), // Extract month number for sorting
+                        text: earnedRewards[key].text
+                    });
+                }
+            }
+
+            saveEarnedRewards(earnedRewards); // Save updated earned rewards to localStorage
+
+            // Sort and render achievements - Certificates first, then monthly, then weekly, then bonus
+            certificatesToRender.sort((a, b) => a.month - b.month).forEach(item => {
+                const achievementItem = document.createElement('div');
+                achievementItem.className = 'achievement-item certificate-achievement';
+                achievementItem.innerHTML = `
+                    <span class="text-5xl mb-4">📜</span>
+                    <p class="text-xl font-bold text-gray-800">${item.text}</p>
+                `;
+                achievementList.appendChild(achievementItem);
+            });
+
+            monthlyRewardsToRender.sort((a, b) => a.month - b.month).forEach(item => {
+                const achievementItem = document.createElement('div');
+                achievementItem.className = 'achievement-item monthly-achievement flex items-center justify-between';
+                const rewardContent = document.createElement('div');
+                rewardContent.className = 'achievement-content';
+                rewardContent.innerHTML = `
+                    <span class="text-3xl">🌟</span>
+                    <p class="text-lg font-semibold text-gray-800 inline">
+                        וואו! סיימת את כל האימונים בחודש ${item.month}! כל הכבוד! מגיע לך ש: <span class="text-pink-700">${item.reward}</span>
+                    </p>
+                `;
+                achievementItem.appendChild(rewardContent);
+                const rewardActions = document.createElement('div');
+                rewardActions.className = 'achievement-actions flex items-center';
+                if (item.used) {
+                    const usedSpan = document.createElement('span');
+                    usedSpan.className = 'achievement-status';
+                    usedSpan.textContent = 'שומש!';
+                    rewardActions.appendChild(usedSpan);
+                } else {
+                    const redeemButton = document.createElement('button');
+                    redeemButton.className = 'redeem-button';
+                    redeemButton.textContent = 'ממשי פרס';
+                    redeemButton.dataset.rewardKey = item.key;
+                    redeemButton.addEventListener('click', function() {
+                        redeemReward(this.dataset.rewardKey);
+                    });
+                    rewardActions.appendChild(redeemButton);
+                }
+                achievementItem.appendChild(rewardActions);
+                achievementList.appendChild(achievementItem);
+            });
+
+            weeklyRewardsToRender.sort((a, b) => (a.month * 100 + a.week) - (b.month * 100 + b.week)).forEach(item => {
+                const achievementItem = document.createElement('div');
+                achievementItem.className = 'achievement-item flex items-center justify-between';
+                const rewardContent = document.createElement('div');
+                rewardContent.className = 'achievement-content';
+                rewardContent.innerHTML = `
+                    <span class="text-3xl">🏆</span>
+                    <p class="text-lg font-semibold text-gray-800 inline">
+                        סיימת את שבוע ${item.week} בחודש ${item.month}! כל הכבוד! מגיע לך ש: <span class="text-amber-600">${item.reward}</span>
+                    </p>
+                `;
+                achievementItem.appendChild(rewardContent);
+                const rewardActions = document.createElement('div');
+                rewardActions.className = 'achievement-actions flex items-center';
+                if (item.used) {
+                    const usedSpan = document.createElement('span');
+                    usedSpan.className = 'achievement-status';
+                    usedSpan.textContent = 'שומש!';
+                    rewardActions.appendChild(usedSpan);
+                } else {
+                    const redeemButton = document.createElement('button');
+                    redeemButton.className = 'redeem-button';
+                    redeemButton.textContent = 'ממשי פרס';
+                    redeemButton.dataset.rewardKey = item.key;
+                    redeemButton.addEventListener('click', function() {
+                        redeemReward(this.dataset.rewardKey);
+                    });
+                    rewardActions.appendChild(redeemButton);
+                }
+                achievementItem.appendChild(rewardActions);
+                achievementList.appendChild(achievementItem);
+            });
+
+            // Bonus rewards
+            bonusRewardsToRender.reverse().forEach(item => { // Show newest bonus rewards first
+                const achievementItem = document.createElement('div');
+                achievementItem.className = 'achievement-item bonus-achievement flex items-center justify-between';
+                const rewardContent = document.createElement('div');
+                rewardContent.className = 'achievement-content';
+                rewardContent.innerHTML = `
+                    <span class="text-3xl">🎁</span>
+                    <p class="text-lg font-semibold text-gray-800 inline">
+                        קיבלת פרס בונוס: <span class="text-sky-600">${item.reward}</span>
+                    </p>
+                `;
+                achievementItem.appendChild(rewardContent);
+                const rewardActions = document.createElement('div');
+                rewardActions.className = 'achievement-actions flex items-center';
+                if (item.used) {
+                    const usedSpan = document.createElement('span');
+                    usedSpan.className = 'achievement-status';
+                    usedSpan.textContent = 'שומש!';
+                    rewardActions.appendChild(usedSpan);
+                } else {
+                    const redeemButton = document.createElement('button');
+                    redeemButton.className = 'redeem-button';
+                    redeemButton.textContent = 'ממשי פרס';
+                    redeemButton.dataset.rewardKey = item.key;
+                    redeemButton.addEventListener('click', function() {
+                        redeemReward(this.dataset.rewardKey);
+                    });
+                    rewardActions.appendChild(redeemButton);
+                }
+                achievementItem.appendChild(rewardActions);
+                achievementList.appendChild(achievementItem);
+            });
+
+            if (completedWeeksCountOverall === 0 && completedMonthsCountOverall === 0 && bonusRewardsToRender.length === 0 && certificatesToRender.length === 0) {
+                achievementList.innerHTML = `<p class="text-center text-gray-500 text-lg">עדיין אין הישגים... בואי נתאמן!</p>`;
+            }
+        }
+
+
+        // --- Export Data Function (Improved with UTF-8 BOM) ---
+        function exportWorkoutDataToCsv() {
+            const headers = [
+                'חודש', 'שבוע', 'יום', 'סוג אימון', 'משך', 'שפה', 'תיאור', 'קישור',
+                'הושלם', 'דירוג', 'הערות'
+            ];
+            
+            // Add BOM for UTF-8 compatibility with Excel (very important for Hebrew)
+            let csvContent = '\uFEFF' + headers.map(header => `"${header}"`).join(',') + '\n';
+
+            workouts.forEach(originalWorkout => {
+                const workoutId = getWorkoutId(originalWorkout);
+                const workoutData = completionStatus[workoutId] || { completed: false, rating: null, notes: "" };
+
+                const row = [
+                    originalWorkout['חודש'],
+                    originalWorkout['שבוע'],
+                    originalWorkout['יום'],
+                    originalWorkout['סוג אימון'],
+                    originalWorkout['משך'],
+                    originalWorkout['שפה'],
+                    originalWorkout['תיאור'],
+                    originalWorkout['קישור'],
+                    workoutData.completed ? 'כן' : 'לא', // "הושלם"
+                    workoutData.rating !== null ? workoutData.rating.toString() : '', // "דירוג"
+                    workoutData.notes // "הערות"
+                ];
+
+                // Escape CSV fields: double quotes around fields with commas or newlines, and double existing double quotes
+                const escapedRow = row.map(field => {
+                    let stringField = String(field);
+                    // Check if the field contains commas, newlines, or double quotes
+                    if (stringField.includes(',') || stringField.includes('\n') || stringField.includes('"')) {
+                        // Double any existing double quotes and wrap the whole field in double quotes
+                        return `"${stringField.replace(/"/g, '""')}"`;
+                    }
+                    return stringField;
+                });
+                csvContent += escapedRow.join(',') + '\n';
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) { // Feature detection for download attribute
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'workout_data.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+
+        // --- Navigation Logic ---
+        function showWorkoutsPage() {
+            // Manage content display area
+            document.getElementById('content-display-area').classList.remove('hidden');
+            workoutContainer.classList.remove('hidden');
+            achievementsContainer.classList.add('hidden');
+            document.getElementById('total-workouts-counter').classList.remove('hidden');
+            
+            // Manage main navigation buttons
+            showWorkoutsBtn.classList.add('active'); // Add active class to main workout tab
+            showAchievementsBtn.classList.remove('active'); // Remove active class from main achievements tab
+            
+            // Manage month tabs visibility
+            monthTabsContainer.classList.remove('hidden'); // Show month tabs
+            
+            currentView = 'workouts'; // Update global view state
+            localStorage.setItem('currentView', currentView); // Save to local storage
+            renderWorkouts(); 
+            updateCompletedWorkoutsCounter();
+        }
+
+        function showAchievementsPage() {
+            // Manage content display area
+            document.getElementById('content-display-area').classList.remove('hidden');
+            workoutContainer.classList.add('hidden');
+            achievementsContainer.classList.remove('hidden');
+            document.getElementById('total-workouts-counter').classList.add('hidden');
+
+            // Manage main navigation buttons
+            showWorkoutsBtn.classList.remove('active'); // Remove active class from main workout tab
+            showAchievementsBtn.classList.add('active'); // Add active class to main achievements tab
+            
+            // Manage month tabs visibility
+            monthTabsContainer.classList.add('hidden'); // Hide month tabs
+
+            currentView = 'achievements'; // Update global view state
+            localStorage.setItem('currentView', currentView); // Save to local storage
+            renderAchievements(); // Render achievements when navigating to the page
+        }
+
+        // Attach event listeners
+        showWorkoutsBtn.addEventListener('click', showWorkoutsPage);
+        showAchievementsBtn.addEventListener('click', showAchievementsPage);
+        exportDataBtn.addEventListener('click', exportWorkoutDataToCsv);
+
+
+        // Initial rendering on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            renderMonthTabs(); // Render month tabs first
+            if (currentView === 'workouts') {
+                showWorkoutsPage();
+            } else {
+                showAchievementsPage();
+            }
+        });
+
+    </script>
+</body>
+</html>
+
