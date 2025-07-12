@@ -10,6 +10,16 @@
     <!-- Updated Favicon Links with Light Blue Color -->
     <link rel="icon" href="https://placehold.co/192x192/87CEEB/87CEEB" sizes="192x192">
     <link rel="shortcut icon" href="https://placehold.co/32x32/87CEEB/87CEEB">
+
+    <!-- PWA: Link to manifest.json -->
+    <link rel="manifest" href="/manifest.json">
+    <!-- PWA: Add meta tags for theme color and Apple devices -->
+    <meta name="theme-color" content="#fdf4ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="תוכנית אימונים">
+
+
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -1572,9 +1582,21 @@
                 setTimeout(showAchievementsPage, 50); // Small delay to allow initial render
             }
             // If savedView is 'workouts', showWorkoutsPage() was already called.
+
+            // PWA: Register Service Worker
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/service-worker.js')
+                        .then(registration => {
+                            console.log('Service Worker registered with scope:', registration.scope);
+                        })
+                        .catch(error => {
+                            console.error('Service Worker registration failed:', error);
+                        });
+                });
+            }
         });
 
     </script>
 </body>
 </html>
-
