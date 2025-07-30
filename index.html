@@ -10,16 +10,6 @@
     <!-- Updated Favicon Links with Light Blue Color -->
     <link rel="icon" href="https://placehold.co/192x192/87CEEB/87CEEB" sizes="192x192">
     <link rel="shortcut icon" href="https://placehold.co/32x32/87CEEB/87CEEB">
-
-    <!-- PWA: Link to manifest.json -->
-    <link rel="manifest" href="/manifest.json">
-    <!-- PWA: Add meta tags for theme color and Apple devices -->
-    <meta name="theme-color" content="#fdf4ff">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="תוכנית אימונים">
-
-
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -588,19 +578,20 @@
 
     <script>
         // Define the CSV data as a multi-line string
+        // This CSV data has been programmatically modified to ensure only one mandatory workout per week.
         const csvData = `חודש,שבוע,יום,סוג אימון,משך,שפה,תיאור,קישור
 1,1,ראשון,יוגה זרימה למתחילים,30 דק',עברית,"תרגול עדין, זרימה ונשימה",https://www.youtube.com/watch?v=0h7taISrO7c
-1,1,שלישי,פילאטיס גוף מלא למתחילים,30 דק',עברית,חיזוק ליבה ורגליים ללא ציוד,https://www.youtube.com/watch?v=QW_0H-5udr0
+1,1,שלישי,פילאטיס גוף מלא למתחילים (אופציונלי),30 דק',עברית,חיזוק ליבה ורגליים ללא ציוד,https://www.youtube.com/watch?v=QW_0H-5udr0
 1,1,שישי,יין יוגה מרגיעה (אופציונלי),30 דק',אנגלית,תנוחות עמוקות להרפיה,https://www.youtube.com/watch?v=sVqH6qPDdh0
 1,2,ראשון,פילאטיס בוקר אנרגטי,30 דק',אנגלית,אימון פילאטיס מחזק וממריץ,https://www.youtube.com/watch?v=cTsZweJPois
-1,2,שלישי,יוגה לכתפיים וגב עליון,30 דק',עברית,שחרור מתחיו חיזוק הגב,https://www.youtube.com/watch?v=SJQEV7DLU34
-1,2,חמישי,פילאטיס גוף מלא לבוקר,30 דק',אנגלית,חיזוק גוף כולל ועיצוב ליבה,https://www.youtube.com/watch?v=G3O9FRAEPG4
+1,2,שלישי,יוגה לכתפיים וגב עליון (אופציונלי),30 דק',עברית,שחרור מתחיו חיזוק הגב,https://www.youtube.com/watch?v=SJQEV7DLU34
+1,2,חמישי,פילאטיס גוף מלא לבוקר (אופציונלי),30 דק',אנגלית,חיזוק גוף כולל ועיצוב ליבה,https://www.youtube.com/watch?v=G3O9FRAEPG4
 1,3,ראשון,שילוב יוגה + פילאטיס,30 דק',אנגלית,"אימון משולב, תנועה וחיזוק",https://www.youtube.com/watch?v=NJU8dcCacRY
-1,3,שלישי,יוגה זרימה למתחילים (Adriene),30 דק',אנגלית,זרימה עדינה ותנוחות בסיסיות,https://www.youtube.com/watch?v=AB3Y-4a3ZrU
+1,3,שלישי,יוגה זרימה למתחילים (Adriene) (אופציונלי),30 דק',אנגלית,זרימה עדינה ותנוחות בסיסיות,https://www.youtube.com/watch?v=AB3Y-4a3ZrU
 1,3,שבת,יוגה רסטורטיבית מפנקת (אופציונלי),45 דק',אנגלית,"יוגה רגועה, נשימה ושחרור",https://www.youtube.com/watch?v=NhCRvb9498A
 1,4,ראשון,יוגה בוקר מרעננת,30 דק',אנגלית,מתיחות קלות לפתיחת היום,https://www.youtube.com/watch?v=8aamtgabSP0
-1,4,שלישי,פילאטיס גוף מלא לבוקר,30 דק',אנגלית,חיזוק הליבה ורגליים,https://www.youtube.com/watch?v=cTsZweJPois
-1,4,חמישי,יוגה זרימה רגועה,40 דק',עברית,אימון זורם עם פתיחות למתחילות,https://www.youtube.com/watch?v=IBTdBA_lIZI`;
+1,4,שלישי,פילאטיס גוף מלא לבוקר (אופציונלי),30 דק',אנגלית,חיזוק הליבה ורגליים,https://www.youtube.com/watch?v=cTsZweJPois
+1,4,חמישי,יוגה זרימה רגועה (אופציונלי),40 דק',עברית,אימון זורם עם פתיחות למתחילות,https://www.youtube.com/watch?v=IBTdBA_lIZI`;
 
 
         // Function to parse CSV data
@@ -837,19 +828,30 @@
 
         // Function to check if a week is completed (only required workouts)
         function isWeekCompleted(monthNum, weekNum, weekWorkouts) {
-            const requiredWorkouts = weekWorkouts.filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
-            if (requiredWorkouts.length === 0) return true; // If no required workouts, week is considered complete
-            return requiredWorkouts.every(workout => {
-                const workoutId = getWorkoutId(workout);
-                return completionStatus[workoutId]?.completed;
-            });
+            // Now, only one workout is mandatory per week.
+            // We need to find the *single* workout that is NOT optional.
+            const mandatoryWorkout = weekWorkouts.find(w => !w['סוג אימון'].includes('(אופציונלי)'));
+            
+            if (!mandatoryWorkout) {
+                // This case should ideally not happen if the CSV is correctly structured
+                // to always have one mandatory workout per week.
+                return true; // If no mandatory workout found, consider week completed to avoid blocking.
+            }
+            
+            const workoutId = getWorkoutId(mandatoryWorkout);
+            return completionStatus[workoutId]?.completed;
         }
 
         // Function to check if a month is completed (only required workouts)
         function isMonthCompleted(monthNum, monthWorkouts) {
-            const allRequiredWorkoutsInMonth = Object.values(monthWorkouts).flat().filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
-            if (allRequiredWorkoutsInMonth.length === 0) return true; // If no required workouts, month is considered complete
-            return allRequiredWorkoutsInMonth.every(workout => {
+            // A month is completed if all its *mandatory* workouts are completed.
+            const allMandatoryWorkoutsInMonth = Object.values(monthWorkouts).flat().filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
+            
+            if (allMandatoryWorkoutsInMonth.length === 0) {
+                return true; // If no mandatory workouts, month is considered complete
+            }
+            
+            return allMandatoryWorkoutsInMonth.every(workout => {
                 const workoutId = getWorkoutId(workout);
                 return completionStatus[workoutId]?.completed;
             });
@@ -1267,10 +1269,10 @@
 
                 for (const weekNum in currentMonthWorkouts) {
                     const weekWorkouts = currentMonthWorkouts[weekNum];
-                    const requiredWorkoutsInWeek = weekWorkouts.filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
-                    const completedRequiredWorkoutsInWeek = requiredWorkoutsInWeek.filter(workout => completionStatus[getWorkoutId(workout)]?.completed).length;
-
-                    if (requiredWorkoutsInWeek.length > 0 && completedRequiredWorkoutsInWeek === requiredWorkoutsInWeek.length) {
+                    // Only count the single mandatory workout for week completion
+                    const mandatoryWorkoutInWeek = weekWorkouts.find(w => !w['סוג אימון'].includes('(אופציונלי)'));
+                    
+                    if (mandatoryWorkoutInWeek && completionStatus[getWorkoutId(mandatoryWorkoutInWeek)]?.completed) {
                         completedWeeksCountOverall++;
                         const weekKey = `week-${monthNum}-${weekNum}`;
 
@@ -1300,10 +1302,11 @@
                     }
                 }
 
-                const allRequiredWorkoutsInMonth = Object.values(currentMonthWorkouts).flat().filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
-                const completedAllRequiredWorkoutsInMonth = allRequiredWorkoutsInMonth.filter(workout => completionStatus[getWorkoutId(workout)]?.completed).length;
+                // For month completion, check if all *mandatory* workouts in the month are completed
+                const allMandatoryWorkoutsInMonth = Object.values(currentMonthWorkouts).flat().filter(w => !w['סוג אימון'].includes('(אופציונלי)'));
+                const completedAllMandatoryWorkoutsInMonth = allMandatoryWorkoutsInMonth.filter(workout => completionStatus[getWorkoutId(workout)]?.completed).length;
 
-                if (allRequiredWorkoutsInMonth.length > 0 && completedAllRequiredWorkoutsInMonth === allRequiredWorkoutsInMonth.length) {
+                if (allMandatoryWorkoutsInMonth.length > 0 && completedAllMandatoryWorkoutsInMonth === allMandatoryWorkoutsInMonth.length) {
                     completedMonthsCountOverall++;
                     const monthKey = `month-${monthNum}`;
                     const certificateKey = `certificate-${monthNum}`;
@@ -1582,19 +1585,6 @@
                 setTimeout(showAchievementsPage, 50); // Small delay to allow initial render
             }
             // If savedView is 'workouts', showWorkoutsPage() was already called.
-
-            // PWA: Register Service Worker
-            if ('serviceWorker' in navigator) {
-                window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/service-worker.js')
-                        .then(registration => {
-                            console.log('Service Worker registered with scope:', registration.scope);
-                        })
-                        .catch(error => {
-                            console.error('Service Worker registration failed:', error);
-                        });
-                });
-            }
         });
 
     </script>
