@@ -421,7 +421,7 @@
             }
         }
 
-        /* Calendar Modal Styles */
+        /* Calendar Modal Styles (reused for Password Modal) */
         .calendar-modal-overlay {
             position: fixed;
             top: 0;
@@ -472,7 +472,8 @@
             text-align: right;
         }
         .calendar-modal-content input[type="date"],
-        .calendar-modal-content input[type="time"] {
+        .calendar-modal-content input[type="time"],
+        .calendar-modal-content input[type="password"] { /* Added password input type */
             width: 100%;
             padding: 0.75rem;
             border: 1px solid #d8b4fe;
@@ -575,6 +576,20 @@
             </div>
         </div>
     </div>
+
+    <!-- Password Modal Overlay - NEW -->
+    <div id="password-modal-overlay" class="calendar-modal-overlay">
+        <div class="calendar-modal-content">
+            <h3 class="text-xl sm:text-2xl font-bold text-gray-700 mb-4 text-center">הקלד/י סיסמה כדי לממש את הפרס</h3>
+            <input type="password" id="password-input" class="w-full p-2 border border-gray-300 rounded-md mb-4 text-center" placeholder="הקלד/י סיסמה">
+            <div class="modal-actions">
+                <button id="password-submit-btn" class="save-button">אישור</button>
+                <button id="password-cancel-btn" class="cancel-button">ביטול</button>
+            </div>
+            <p id="password-error-message" class="text-red-500 mt-2 hidden">סיסמה שגויה, נס/י שוב.</p>
+        </div>
+    </div>
+
 
     <script>
         // Define the CSV data as a multi-line string
@@ -710,7 +725,8 @@
             "אעשה לך מסאז' רבע שעה",
             "נעשה משהו שאת רוצה",
             "נעשה משהו שאת רוצה... 🔞",
-            "אני אנשק את כל הגוף שלך❤️"
+            "אני אנשק את כל הגוף שלך❤️",
+            "לעשות ביחד יצירת אומנות לבחירתך" // NEW: Added reward for week completion
         ];
         
         // Global variable to store the last random reward shown (for regular rewards and bonus)
@@ -810,6 +826,17 @@
 
         // Store workout data temporarily for calendar modal
         let currentWorkoutForCalendar = null;
+
+        // NEW: Password Modal Elements
+        const passwordModalOverlay = document.getElementById('password-modal-overlay');
+        const passwordInput = document.getElementById('password-input');
+        const passwordSubmitBtn = document.getElementById('password-submit-btn');
+        const passwordCancelBtn = document.getElementById('password-cancel-btn');
+        const passwordErrorMessage = document.getElementById('password-error-message');
+
+        // NEW: Password and Current Reward Key for password modal
+        const CORRECT_PASSWORD = "HADAR12";
+        let currentRewardKeyToRedeem = null;
 
 
         /**
@@ -1212,16 +1239,53 @@
         });
 
 
-        // --- Redeem Reward Function ---
-        function redeemReward(rewardKey) {
+        // --- NEW: Function to perform the actual reward redemption ---
+        function _performRedeemAction(rewardKey) {
             let earnedRewards = loadEarnedRewards();
             if (earnedRewards[rewardKey] && !earnedRewards[rewardKey].used) {
                 earnedRewards[rewardKey].used = true;
                 saveEarnedRewards(earnedRewards);
                 renderAchievements();
+                showTemporaryMessage("הפרס מומש בהצלחה!"); // Success message
             }
         }
 
+        // --- NEW: Function to initiate reward redemption (opens password modal) ---
+        function attemptRedeemReward(rewardKey) {
+            currentRewardKeyToRedeem = rewardKey;
+            passwordInput.value = ''; // Clear previous input
+            passwordErrorMessage.classList.add('hidden'); // Hide error message
+            passwordModalOverlay.classList.add('show');
+        }
+
+        // --- NEW: Event listeners for Password Modal ---
+        passwordCancelBtn.addEventListener('click', () => {
+            passwordModalOverlay.classList.remove('show');
+            currentRewardKeyToRedeem = null;
+            passwordInput.value = ''; // Clear input on cancel
+            passwordErrorMessage.classList.add('hidden');
+        });
+
+        passwordSubmitBtn.addEventListener('click', () => {
+            const enteredPassword = passwordInput.value;
+            if (enteredPassword === CORRECT_PASSWORD) {
+                if (currentRewardKeyToRedeem) {
+                    _performRedeemAction(currentRewardKeyToRedeem);
+                    passwordModalOverlay.classList.remove('show');
+                    currentRewardKeyToRedeem = null;
+                }
+            } else {
+                passwordErrorMessage.classList.remove('hidden');
+                passwordInput.value = ''; // Clear input on incorrect password
+            }
+        });
+
+        // Optional: Allow pressing Enter in the password field to submit
+        passwordInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                passwordSubmitBtn.click();
+            }
+        });
 
         // Function to update month completion display and trigger certificate
         function updateMonthCompletionDisplay(container, monthNum, monthWorkouts) {
@@ -1395,8 +1459,9 @@
                     redeemButton.className = 'redeem-button';
                     redeemButton.textContent = 'ממשי פרס';
                     redeemButton.dataset.rewardKey = item.key;
+                    // NEW: Call attemptRedeemReward instead of directly _performRedeemAction
                     redeemButton.addEventListener('click', function() {
-                        redeemReward(this.dataset.rewardKey);
+                        attemptRedeemReward(this.dataset.rewardKey);
                     });
                     rewardActions.appendChild(redeemButton);
                 }
@@ -1428,8 +1493,9 @@
                     redeemButton.className = 'redeem-button';
                     redeemButton.textContent = 'ממשי פרס';
                     redeemButton.dataset.rewardKey = item.key;
+                    // NEW: Call attemptRedeemReward instead of directly _performRedeemAction
                     redeemButton.addEventListener('click', function() {
-                        redeemReward(this.dataset.rewardKey);
+                        attemptRedeemReward(this.dataset.rewardKey);
                     });
                     rewardActions.appendChild(redeemButton);
                 }
@@ -1460,10 +1526,11 @@
                 } else {
                     const redeemButton = document.createElement('button');
                     redeemButton.className = 'redeem-button';
-                    redeemButton.textContent = 'ממשי פרס';
+                    redeeemButton.textContent = 'ממשי פרס';
                     redeemButton.dataset.rewardKey = item.key;
+                    // NEW: Call attemptRedeemReward instead of directly _performRedeemAction
                     redeemButton.addEventListener('click', function() {
-                        redeemReward(this.dataset.rewardKey);
+                        attemptRedeemReward(this.dataset.rewardKey);
                     });
                     rewardActions.appendChild(redeemButton);
                 }
@@ -1590,3 +1657,4 @@
     </script>
 </body>
 </html>
+
